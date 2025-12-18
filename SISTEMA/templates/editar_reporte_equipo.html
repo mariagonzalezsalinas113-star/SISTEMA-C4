@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-lg border-primary">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">🛠️ Gestionar Reporte de Equipo #{{ reporte.id }}</h3>
+        </div>
+        <div class="card-body">
+            
+            <p class="lead"><strong>Reportado por:</strong> {{ reporte.user.username }}</p>
+            <p><strong>Sector Reportado:</strong> {{ reporte.sector }}</p>
+            <hr>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="text-secondary">Foto de la Falla:</h5>
+                    {% if reporte.foto_falla_path %}
+                        <a href="{{ url_for('static', filename=reporte.foto_falla_path) }}" target="_blank">
+                            <img src="{{ url_for('static', filename=reporte.foto_falla_path) }}" 
+                                 alt="Foto de la Falla" 
+                                 class="img-fluid rounded shadow-sm border" style="max-height: 200px; width: auto;">
+                        </a>
+                    {% else %}
+                        <p class="text-muted">No se subió foto de la falla.</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-secondary">Foto de Reparación (Evidencia):</h5>
+                    {% if reporte.foto_reparado_path %}
+                        <a href="{{ url_for('static', filename=reporte.foto_reparado_path) }}" target="_blank">
+                            <img src="{{ url_for('static', filename=reporte.foto_reparado_path) }}" 
+                                 alt="Foto del Equipo Reparado" 
+                                 class="img-fluid rounded shadow-sm border" style="max-height: 200px; width: auto;">
+                        </a>
+                    {% else %}
+                        <p class="text-muted">Foto pendiente de subir.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <hr>
+
+            <h4 class="text-success mt-4">Actualizar Reporte y Estado</h4>
+            <form method="POST" action="{{ url_for('editar_reporte_equipo', reporte_id=reporte.id) }}" enctype="multipart/form-data">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="inventario" class="form-label">N° Inventario:</label>
+                        <input type="text" id="inventario" name="inventario" 
+                               value="{{ reporte.inventario_numero }}" 
+                               class="form-control" 
+                               {% if current_user.role != 'Admin' %} disabled title="Solo el Administrador puede editar este campo." {% endif %}
+                               required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="sector" class="form-label">Sector:</label>
+                        <input type="text" id="sector" name="sector" 
+                               value="{{ reporte.sector }}" 
+                               class="form-control"
+                               {% if current_user.role != 'Admin' %} disabled title="Solo el Administrador puede editar este campo." {% endif %}
+                               required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="falla" class="form-label">Descripción de la Falla:</label>
+                    <textarea name="falla" id="falla" rows="4" class="form-control" 
+                              {% if current_user.role != 'Admin' %} disabled title="Solo el Administrador puede editar este campo." {% endif %}
+                              required>{{ reporte.falla_descripcion }}</textarea>
+                </div>
+
+                <h5 class="mt-4 text-primary">Gestión de Técnico</h5>
+                <hr>
+
+                <div class="mb-3">
+                    <label for="estado" class="form-label">Nuevo Estado:</label>
+                    <select name="estado" id="estado" class="form-select" required>
+                        <option value="Pendiente" {% if reporte.estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="En Progreso" {% if reporte.estado == 'En Progreso' %}selected{% endif %}>En Progreso</option>
+                        <option value="Reparado" {% if reporte.estado == 'Reparado' %}selected{% endif %}>Reparado</option>
+                        <option value="Cerrado" {% if reporte.estado == 'Cerrado' %}selected{% endif %}>Cerrado/Finalizado</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="foto_reparado" class="form-label">Subir Foto de Reparación (Evidencia):</label>
+                    <input type="file" name="foto_reparado" id="foto_reparado" class="form-control" accept="image/*">
+                    <div class="form-text">Esto actualizará o añadirá la imagen en la sección de arriba.</div>
+                </div>
+                
+                <button type="submit" class="btn btn-success me-2">
+                    <i class="bi bi-save"></i> Guardar Cambios y Actualizar Estado
+                </button>
+                <a href="{% if current_user.role == 'Admin' %}{{ url_for('admin_ver_equipos') }}{% else %}{{ url_for('tecnico_dashboard') }}{% endif %}" class="btn btn-secondary">
+                    Cancelar
+                </a>
+            </form>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

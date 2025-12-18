@@ -1,0 +1,128 @@
+/*
+====================================
+    Estilos Personalizados del Dashboard
+====================================
+*/
+
+/* --- 1. Base y Tipografía --- */
+body {
+    background-color: #eef2f7; /* Fondo gris muy claro para contraste */
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+/* --- 2. Encabezado Principal --- */
+h1 {
+    font-weight: 700;
+    color: #0d47a1; /* Azul institucional fuerte */
+    border-bottom: 3px solid #0d47a1;
+    padding-bottom: 12px;
+    margin-bottom: 30px !important;
+}
+
+/* --- 3. Tarjeta de Bienvenida (Éxito) --- */
+.card.bg-success {
+    background: linear-gradient(135deg, #28a745, #198754) !important; /* Degradado sutil */
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2); /* Sombra más fuerte para resaltarlo */
+    padding: 10px;
+}
+
+.card.bg-success .card-title {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+/* --- 4. Tarjetas de Funcionalidad --- */
+.card.shadow-sm {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    transition: all 0.3s ease; /* Transición suave para todos los efectos */
+    overflow: hidden; /* Limpia cualquier borde excesivo */
+}
+
+/* Efecto Hover: Sombra y levantamiento */
+.card.shadow-sm:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+/* Títulos y texto dentro de la tarjeta */
+.card-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-text.small {
+    font-size: 0.875rem;
+    color: #6c757d;
+    min-height: 40px; /* Asegura altura consistente para las descripciones */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+/* --- 5. Estilo de Iconos y Botones por Categoría --- */
+
+/* Reportar Falla de Equipo (Info) */
+.card-body i.fa-headset.fa-3x {
+    color: #17a2b8; /* Tono de Info */
+}
+.card-body .text-info {
+    color: #17a2b8 !important;
+}
+.card-body .btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    font-weight: 600;
+}
+.card-body .btn-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+}
+
+/* Reportar Falla de Patrulla (Danger) */
+.card-body i.fa-car.fa-3x {
+    color: #dc3545; /* Tono de Danger */
+}
+.card-body .text-danger {
+    color: #dc3545 !important;
+}
+.card-body .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    font-weight: 600;
+}
+.card-body .btn-danger:hover {
+    background-color: #bd2130;
+    border-color: #b21f2d;
+}
+
+/* Ver Mis Reportes (Secondary) */
+.card-body i.fa-list-alt.fa-3x {
+    color: #6c757d; /* Tono de Secondary */
+}
+.card-body .text-secondary {
+    color: #6c757d !important;
+}
+.card-body .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    font-weight: 600;
+}
+.card-body .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* Botones en general */
+.btn {
+    border-radius: 50px; /* Botones redondeados (Pill buttons) */
+    padding: 10px 25px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

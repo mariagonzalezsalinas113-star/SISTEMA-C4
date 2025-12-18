@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Patrulla Interactivo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #0965c7;
+            --secondary-color: #6c757d;
+            --success-color: #333ed3;
+            --danger-color: #dc3545;
+            --bg-light: #f4f7f9;
+            --card-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            --falla-bg: #fff3cd;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-light);
+            padding: 30px 20px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card {
+            background: #fff;
+            max-width: 850px;
+            width: 100%;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            margin-top: 20px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            font-size: 30px;
+            font-weight: 900;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #495057;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #509deb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p.subtitle {
+            margin-bottom: 25px;
+            color: #0073d8;
+            font-size: 16px;
+        }
+
+        label {
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: block;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .required-star {
+            color: var(--danger-color);
+            margin-left: 5px;
+        }
+
+        input:not([type="checkbox"]):not([type="file"]), select, textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border-radius: 10px;
+            border: 1px solid #ced4da;
+            margin-bottom: 15px;
+            background: #ffffff;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+            outline: none;
+        }
+
+        .input-error {
+            border: 2px solid var(--danger-color) !important;
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.15);
+        }
+
+        .grid-container {
+            display: grid;
+            /* Tres columnas en pantallas grandes */
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            background: #e9f7ff;
+            border: 1px solid #cce5ff;
+        }
+
+        .camara-group {
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 15px;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .camara-item {
+            border-bottom: 1px dashed #e9ecef;
+            padding: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .camara-item:last-child {
+            border-bottom: none;
+        }
+
+        .camara-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        input[type="file"] {
+            border: 2px dashed var(--secondary-color);
+            padding: 10px;
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .camara-checkbox {
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid var(--success-color);
+            margin-right: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            min-width: 30px; 
+        }
+
+        .camara-checkbox:checked {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .camara-checkbox:checked::after {
+            content: "\f00c";
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+        }
+
+        .camara-checkbox:not(:checked) {
+            border-color: var(--danger-color);
+            background: #fff;
+        }
+
+        .camara-checkbox:not(:checked)::after {
+            content: "\f057";
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--danger-color);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+        }
+
+        .falla-container {
+            margin-top: 10px;
+            padding: 0 20px;
+            border-radius: 10px;
+            background: var(--falla-bg);
+            border: 1px solid #ffeeba;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.5s ease-in-out, opacity 0.4s ease-in-out, padding 0.5s ease-in-out;
+            overflow: hidden;
+        }
+
+        .falla-container.visible {
+            max-height: 500px;
+            opacity: 1;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .falla-container .photo-group {
+            border-left: 1px dashed var(--danger-color);
+            padding-left: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .btn-submit, .btn-back {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .btn-submit:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        .btn-back {
+            background: var(--secondary-color);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(108, 117, 125, 0.2);
+        }
+
+        input[readonly] {
+            background: #e9ecef !important;
+            color: #6c757d;
+            cursor: not-allowed !important;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px;
+            }
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            .falla-container.visible {
+                grid-template-columns: 1fr;
+            }
+            .falla-container .photo-group {
+                border-left: none;
+                padding-left: 0;
+                padding-top: 15px;
+                border-top: 1px dashed var(--danger-color);
+            }
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2><i class="fas fa-car-crash"></i> Reporte de Patrulla</h2>
+    <p class="subtitle">Verificación de equipo vehicular y sistemas de videovigilancia. <strong>Desmarque un elemento para reportar una falla y adjuntar evidencia obligatoria.</strong></p>
+
+    <form id="patrol-form" enctype="multipart/form-data" method="POST" action="{{ url_for('reporte_patrulla_form') }}">
+
+        <h3><i class="fas fa-id-card"></i> Información de la Unidad</h3>
+
+        <div class="grid-container">
+
+            <div>
+                <label for="oficial-nombre">Oficial a Cargo:<span class="required-star">*</span></label>
+                <input type="text" id="oficial-nombre" name="oficial_nombre" placeholder="Ej: Oficial Ramírez" required>
+            </div>
+
+            <div>
+                <label for="patrulla-numero">Unidad/Patrulla No.:<span class="required-star">*</span></label>
+                <input type="text" id="patrulla-numero" name="unidad_numero" placeholder="Ej: P-101" required>
+            </div>
+            
+            <div>
+                <label for="fecha-reporte">Fecha y Hora del Reporte:<span class="required-star">*</span></label>
+                <input type="datetime-local" id="fecha-reporte" name="fecha_reporte" required readonly>
+            </div>
+
+            <div>
+                <label for="patrulla-marca">Marca:<span class="required-star">*</span></label>
+                <input type="text" id="patrulla-marca" name="marca" placeholder="Ej: Ford, Chevrolet" required>
+            </div>
+
+            <div>
+                <label for="patrulla-modelo">Modelo:<span class="required-star">*</span></label>
+                <input type="text" id="patrulla-modelo" name="modelo" placeholder="Ej: Taho, Charger" required>
+            </div>
+            
+            <div>
+                <label for="patrulla-placa">Placa:<span class="required-star">*</span></label>
+                <input type="text" id="patrulla-placa" name="placa" placeholder="Ej: ABC-123" required>
+            </div>
+
+            <div>
+                <label for="turno">Turno:<span class="required-star">*</span></label>
+                <select id="turno" name="turno" required>
+                    <option value="" disabled selected>Seleccione el Turno</option>
+                    <option value="matutino">Matutino</option>
+                    <option value="vespertino">Vespertino</option>
+                    <option value="nocturno">Nocturno</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="sector">Sector:<span class="required-star">*</span></label>
+                <input type="text" id="sector" name="sector" placeholder="Ej: Centro, Sur-1, Zona Industrial" required>
+            </div>
+
+            <div></div> 
+
+
+        </div>
+
+        <h3><i class="fas fa-video"></i> Estado de Cámaras</h3>
+
+        <div class="camara-group">
+
+            {% for i in range(1, 5) %}
+            <div class="camara-item">
+                <div class="camara-header">
+                    <label for="camara-{{ i }}">
+                        <input type="checkbox" id="camara-{{ i }}" name="camara_{{ i }}" value="1" checked class="camara-checkbox" data-element-type="camara" data-element-id="{{ i }}">
+                        Cámara {{ i }}
+                    </label>
+                </div>
+
+                <div id="falla-camara-{{ i }}-container" class="falla-container">
+
+                    <div class="desc-group">
+                        <label for="falla-camara-desc-{{ i }}">⚠️ Describa la Falla:<span class="required-star">*</span></label>
+                        <textarea id="falla-camara-desc-{{ i }}" name="falla_camara_desc_{{ i }}" rows="3" placeholder="Ej: Se apaga, no graba, lente sucio..." disabled></textarea> 
+                    </div>
+
+                    <div class="photo-group">
+                        <label for="falla-camara-foto-{{ i }}">📷 Adjuntar Evidencia:<span class="required-star">*</span></label>
+                        <input type="file" id="falla-camara-foto-{{ i }}" name="falla_camara_foto_{{ i }}" accept="image/*" disabled>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <h3><i class="fas fa-hdd"></i> Estado de Grabadoras</h3>
+
+        <div class="camara-group">
+
+            {% for i in range(1, 5) %} 
+            <div class="camara-item">
+                <div class="camara-header">
+                    <label for="grabadora-{{ i }}">
+                        <input type="checkbox" id="grabadora-{{ i }}" name="grabadora_{{ i }}" value="1" checked class="camara-checkbox" data-element-type="grabadora" data-element-id="{{ i }}">
+                        Grabadora {{ i }}
+                    </label>
+                </div>
+
+                <div id="falla-grabadora-{{ i }}-container" class="falla-container">
+
+                    <div class="desc-group">
+                        <label for="falla-grabadora-desc-{{ i }}">⚠️ Describa la Falla:<span class="required-star">*</span></label>
+                        <textarea id="falla-grabadora-desc-{{ i }}" name="falla_grabadora_desc_{{ i }}" rows="3" placeholder="Ej: No enciende, no graba, disco lleno..." disabled></textarea> 
+                    </div>
+
+                    <div class="photo-group">
+                        <label for="falla-grabadora-foto-{{ i }}">📷 Adjuntar Evidencia:<span class="required-star">*</span></label>
+                        <input type="file" id="falla-grabadora-foto-{{ i }}" name="falla_grabadora_foto_{{ i }}" accept="image/*" disabled>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <h3><i class="fas fa-tools"></i> Observaciones Generales</h3>
+        <div>
+            <label for="observaciones">Detalles Adicionales:</label>
+            <textarea id="observaciones" name="observaciones" rows="3" placeholder="Ej: Ruido en motor, llanta baja, etc."></textarea>
+        </div>
+
+        <div class="button-group">
+            <a href="{{ url_for('dashboard') }}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> ENVIAR REPORTE</button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    function toggleFallaDescription(event) {
+        const checkbox = event.target;
+        const elementType = checkbox.dataset.elementType; // 'camara' o 'grabadora'
+        const elementId = checkbox.dataset.elementId;
+        
+        // Contenedores y campos específicos para el elemento
+        const fallaContainer = document.getElementById(`falla-${elementType}-${elementId}-container`);
+        const textarea = document.getElementById(`falla-${elementType}-desc-${elementId}`);
+        const fileInput = document.getElementById(`falla-${elementType}-foto-${elementId}`);
+
+        if (checkbox.checked) {
+            // Checkbox marcado (OK) -> Ocultar campos
+            fallaContainer.classList.remove('visible');
+            
+            // Desactivar y quitar validación
+            textarea.setAttribute('disabled', 'disabled');
+            fileInput.setAttribute('disabled', 'disabled');
+            textarea.removeAttribute('required');
+            fileInput.removeAttribute('required');
+
+            // Limpiar valores y errores (para no enviar datos basura ni mostrar error)
+            textarea.value = '';
+            fileInput.value = '';
+            textarea.classList.remove('input-error');
+            fileInput.classList.remove('input-error');
+
+        } else {
+            // Checkbox desmarcado (Falla) -> Mostrar campos
+            fallaContainer.classList.add('visible');
+            
+            // Activar y agregar validación
+            textarea.removeAttribute('disabled');
+            fileInput.removeAttribute('disabled');
+            textarea.setAttribute('required', 'required');
+            fileInput.setAttribute('required', 'required');
+            textarea.focus();
+        }
+    }
+
+    function setInitialDateTime() {
+        // Asegura que la fecha y hora se establezcan al momento de cargar el formulario.
+        const now = new Date();
+        // Formato YYYY-MM-DDTHH:MM (requerido por input[type="datetime-local"])
+        const format = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        };
+        document.getElementById("fecha-reporte").value = format(now);
+    }
+
+    function validateAndSubmit(e) {
+        let validationError = false;
+
+        // Comprobación de validación nativa HTML5 (campos 'required' marcados)
+        if (!document.getElementById('patrol-form').checkValidity()) {
+             // Si la validación nativa falla, el navegador mostrará el mensaje de error.
+             return; 
+        }
+
+        // --- Validación personalizada para Cámaras y Grabadoras no marcadas ---
+        
+        // Iterar sobre todos los checkboxes que representan elementos y que están desmarcados (fallas)
+        document.querySelectorAll('.camara-checkbox:not(:checked)').forEach(checkbox => {
+
+            const elementType = checkbox.dataset.elementType;
+            const elementId = checkbox.dataset.elementId;
+            
+            const textarea = document.getElementById(`falla-${elementType}-desc-${elementId}`);
+            const fileInput = document.getElementById(`falla-${elementType}-foto-${elementId}`);
+
+            const isTextareaEmpty = textarea.value.trim() === "";
+            const isFileEmpty = fileInput.files.length === 0;
+
+            if (isTextareaEmpty) {
+                validationError = true;
+                textarea.classList.add('input-error');
+            } else {
+                textarea.classList.remove('input-error');
+            }
+
+            if (isFileEmpty) {
+                validationError = true;
+                fileInput.classList.add('input-error');
+            } else {
+                fileInput.classList.remove('input-error');
+            }
+        });
+
+        if (validationError) {
+            e.preventDefault(); // Evita que el formulario se envíe
+            alert("Debe describir la falla y adjuntar la foto de evidencia para todos los elementos desmarcados (con 'X').");
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        setInitialDateTime();
+
+        // Asignar el listener a todos los checkboxes de cámaras y grabadoras
+        document.querySelectorAll('.camara-checkbox').forEach(checkbox => {
+
+            checkbox.addEventListener('change', toggleFallaDescription);
+            
+            // Configuración inicial de visibilidad al cargar la página
+            if (checkbox.checked) {
+                // Si está marcado (OK), asegura que los campos de falla estén ocultos y deshabilitados
+                const elementType = checkbox.dataset.elementType;
+                const elementId = checkbox.dataset.elementId;
+                document.getElementById(`falla-${elementType}-desc-${elementId}`).setAttribute('disabled', 'disabled');
+                document.getElementById(`falla-${elementType}-foto-${elementId}`).setAttribute('disabled', 'disabled');
+            }
+        });
+
+        document.getElementById("patrol-form").addEventListener('submit', validateAndSubmit);
+
+    });
+</script>
+
+</body>
+</html>

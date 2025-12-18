@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Usuario{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">
+    <i class="fas fa-id-badge me-2"></i> Panel de Usuario / Oficial
+</h1>
+
+<div class="card bg-success text-white shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title"><i class="fas fa-user-circle me-2"></i> Bienvenido, {{ user.username }}</h5>
+        <p class="card-text">Tu sector de operación es: <strong>{{ user.sector }}</strong>.</p>
+        <p class="card-text">Utiliza las opciones a continuación para reportar fallas en equipos o patrullas.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- Reportar Falla de Equipo -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-headset fa-3x text-info mb-3"></i>
+                <h5 class="card-title text-info">Reportar Falla de Equipo</h5>
+                <p class="card-text small">Radios, GPS, PDA, chalecos, etc.</p>
+                <a href="{{ url_for('reporte_equipo_form') }}" class="btn btn-info text-white mt-2">
+                    <i class="fas fa-plus-circle me-1"></i> Crear Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reportar Falla de Patrulla -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-car fa-3x text-danger mb-3"></i>
+                <h5 class="card-title text-danger">Reportar Falla de Patrulla</h5>
+                <p class="card-text small">Cámaras, DVR, pantallas, etc.</p>
+                <a href="{{ url_for('reporte_patrulla_form') }}" class="btn btn-danger mt-2">
+                    <i class="fas fa-plus-circle me-1"></i> Crear Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ver Mis Reportes -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-list-alt fa-3x text-secondary mb-3"></i>
+                <h5 class="card-title text-secondary">Ver Mis Reportes</h5>
+                <p class="card-text small">Consulta el estado de tus reportes enviados.</p>
+                <a href="{{ url_for('mis_reportes') }}" class="btn btn-secondary mt-2">
+                    <i class="fas fa-search me-1"></i> Revisar Historial
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

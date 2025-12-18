@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte de Equipos{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #13158d;
+        --success-color: #10b981;
+        --warning-color: #9c6300;
+        --danger-color: #ef4444;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+    
+    .container-main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .card-main {
+        background: white;
+        border-radius: 1.5rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        animation: slideUp 0.5s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .header-section {
+        background: linear-gradient(135deg, #0b22f5 0%, #069dd9 100%);
+        padding: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .header-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    .header-section h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .header-section p {
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .form-section {
+        padding: 2.5rem;
+    }
+    
+    .info-banner {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left: 4px solid var(--warning-color);
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(245, 158, 11, 0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 1.75rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-label i {
+        color: var(--warning-color);
+        margin-right: 0.5rem;
+    }
+    
+    .required-star {
+        color: var(--danger-color);
+        margin-left: 0.25rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--warning-color);
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+        transform: translateY(-1px);
+    }
+    
+    .form-control.error {
+        border-color: var(--danger-color);
+        background-color: #fef2f2;
+    }
+    
+    .form-hint {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-hint i {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #0b5cb8 0%, #032ce0 100%);
+        color: white;
+        border: none;
+        border-radius: 0.875rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-submit::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .btn-submit:hover::before {
+        left: 100%;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4);
+    }
+    
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+    
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--primary-color);
+        font-weight: 600;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s ease;
+        margin-top: 1.5rem;
+    }
+    
+    .back-link:hover {
+        background-color: #eef2ff;
+        transform: translateX(-5px);
+    }
+    
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.85);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 1rem;
+    }
+    
+    .modal.active {
+        display: flex;
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 1.5rem;
+        max-width: 600px;
+        width: 100%;
+        padding: 2rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        animation: modalSlideUp 0.4s ease-out;
+    }
+    
+    @keyframes modalSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    .modal-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-close-modal {
+        width: 100%;
+        padding: 1rem;
+        background: var(--danger-color);
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-close-modal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+</style>
+
+<div class="container-main">
+    <div class="card-main">
+
+        <div class="header-section">
+            <h2>
+                <i class="fas fa-tools"></i> Reporte de Falla de Activos
+            </h2>
+            <p>Sistema de gestión y control de equipos operacionales</p>
+        </div>
+
+        <div class="form-section">
+
+            <div class="info-banner">
+                <div style="display: flex; align-items: start;">
+                    <i class="fas fa-info-circle" style="font-size: 1.25rem; margin-right: 0.75rem; margin-top: 0.125rem;"></i>
+                    <div>
+                        <strong style="display: block; margin-bottom: 0.25rem;">Reportando como:</strong>
+                        <span>{{ current_user.username }}</span>
+                        <span style="margin: 0 0.5rem;">•</span>
+                        <span>Sector: {{ current_user.sector or 'No Asignado' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <form id="equipment-form" method="POST" action="{{ url_for('reporte_equipo_form') }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="tipo">
+                        <i class="fas fa-laptop"></i>
+                        Tipo de Equipo
+                        <span class="required-star">*</span>
+                    </label>
+                    <select id="tipo" name="tipo" class="form-control" required>
+                        <option value="">Seleccione el tipo de activo...</option>
+                        <option value="Computadora">💻 Computadora (Desktop/Laptop)</option>
+                        <option value="Impresora">🖨️ Impresora / Multifuncional</option>
+                        <option value="Servidor">🖥️ Servidor / Rack</option>
+                        <option value="Equipo de Red">📡 Equipo de Red (Switch, Router, AP)</option>
+                        <option value="Radio">📻 Radio de Comunicación</option>
+                        <option value="Otro">📦 Otro/No listado</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="serie">
+                        <i class="fas fa-barcode"></i>
+                        No. de Serie / ID de Inventario
+                        <span class="required-star">*</span>
+                    </label>
+                    <input id="serie" name="serie" type="text" class="form-control" placeholder="Ej: ABC123456 o ID interno" required>
+                    <div class="form-hint">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Este identificador es crucial para localizar el activo</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="estado">
+                        <i class="fas fa-clipboard-check"></i>
+                        Estado Reportado
+                        <span class="required-star">*</span>
+                    </label>
+                    <select id="estado" name="estado" class="form-control" required>
+                        <option value="">Seleccione el estado actual...</option>
+                        <option value="operativo">✅ Operativo (Sin Fallas)</option>
+                        <option value="falla_menor">⚠️ Falla Menor (Funciona con problemas)</option>
+                        <option value="falla_grave">🛑 Falla Grave (Inoperable)</option>
+                        <option value="mantenimiento">⚙️ Requiere Mantenimiento Preventivo</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="comentarios">
+                        <i class="fas fa-comment-alt"></i>
+                        Descripción Detallada de la Falla
+                        <span id="comentarios-required-star"></span>
+                    </label>
+                    <textarea id="comentarios" name="comentarios" class="form-control" rows="5" placeholder="Describe exactamente qué sucede, cuándo ocurre y si hay mensajes de error..."></textarea>
+                    <div class="form-hint" id="comentarios-hint">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Proporciona la mayor cantidad de detalles posible</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane" style="margin-right: 0.75rem;"></i>
+                    Enviar Reporte de Equipo
+                </button>
+            </form>
+
+            <div style="text-align: center;">
+                <a href="{{ url_for('oficial_dashboard') }}" class="back-link">
+                    <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                    Volver al Panel Principal
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="message-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-icon">
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+            </div>
+            <h3 style="color: var(--danger-color); margin-bottom: 0.5rem;">Error de Validación</h3>
+            <p style="color: #6b7280; font-size: 0.95rem;" id="modal-error-message">Por favor, corrige el siguiente problema.</p>
+        </div>
+        
+        <div class="modal-footer">
+            <button id="modal-close-btn" class="btn-close-modal">
+                <i class="fas fa-undo" style="margin-right: 0.5rem;"></i>
+                Volver al Formulario
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("equipment-form");
+    const estadoSelect = document.getElementById("estado");
+    const comentariosTextarea = document.getElementById("comentarios");
+    const modal = document.getElementById("message-modal");
+    const comentariosRequiredStar = document.getElementById("comentarios-required-star");
+    const comentariosHint = document.getElementById("comentarios-hint");
+    const modalErrorMessage = document.getElementById('modal-error-message');
+
+    function showModal(message) {
+        modalErrorMessage.textContent = message;
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    function validateForm(e) {
+        const estado = estadoSelect.value;
+        const comentarios = comentariosTextarea.value.trim();
+        const isFalla = ['falla_menor', 'falla_grave', 'mantenimiento'].includes(estado);
+        
+        if (!form.checkValidity()) {
+            return true; 
+        }
+
+        if (isFalla && !comentarios) {
+            e.preventDefault();
+            comentariosTextarea.classList.add('error');
+            showModal("Para el estado seleccionado (Falla/Mantenimiento), es OBLIGATORIO describir el problema en detalle.");
+            return false;
+        }
+        
+        comentariosTextarea.classList.remove('error');
+        return true;
+    }
+
+    estadoSelect.addEventListener('change', () => {
+        const estado = estadoSelect.value;
+        const isFalla = ['falla_menor', 'falla_grave', 'mantenimiento'].includes(estado);
+        
+        if (isFalla) {
+            comentariosRequiredStar.innerHTML = '<span class="required-star">*</span>';
+            comentariosTextarea.setAttribute('placeholder', 'Descripción OBLIGATORIA: Detalla el problema observado...');
+            comentariosHint.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>Este campo es obligatorio para el estado seleccionado</span>';
+        } else {
+            comentariosRequiredStar.innerHTML = '';
+            comentariosTextarea.setAttribute('placeholder', 'Comentarios adicionales (opcional)...');
+            comentariosHint.innerHTML = '<i class="fas fa-info-circle"></i><span>Proporciona detalles adicionales si es necesario</span>';
+        }
+    });
+
+    document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+    form.addEventListener('submit', validateForm);
+    
+    window.onload = () => {
+        estadoSelect.dispatchEvent(new Event('change'));
+    };
+</script>
+
+{% endblock %}

@@ -1,0 +1,8 @@
+<a href="{{ url_for('tecnico_dashboard') }}" class="btn btn-secondary">
+
+a la ruta sugerida por el error:
+
+```html
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+
+Esto debería resolver el error `BuildError` y permitirte volver a tu panel principal. Si el problema persiste, revisa tu archivo `app.py` para confirmar si la función de vista que maneja el dashboard del técnico se llama `dashboard`.

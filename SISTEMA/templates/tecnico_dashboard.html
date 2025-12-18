@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Técnico{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">
+    <i class="fas fa-wrench me-2"></i> Panel de Técnico
+</h1>
+
+<div class="card bg-info text-white shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title"><i class="fas fa-user-tag me-2"></i> Bienvenido, {{ user.username }}</h5>
+        <p class="card-text">Tu rol es <strong>{{ user.role }}</strong> y gestionas los reportes del sector: <strong>{{ user.sector }}</strong>.</p>
+        <p class="card-text">A continuación se muestran todos los reportes pendientes de tu sector para que puedas iniciar el proceso de reparación.</p>
+    </div>
+</div>
+
+<h2 class="mt-5 text-info"><i class="fas fa-headset me-2"></i> Reportes de Equipos Pendientes</h2>
+
+{% if pendientes_equipo %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-info">
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Inventario</th>
+                <th>Falla Reportada</th>
+                <th>Fecha Reporte</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reporte_equipo in pendientes_equipo %}
+            <tr>
+                <td>{{ reporte_equipo.id }}</td>
+                <td><span class="badge bg-secondary">{{ reporte_equipo.user.username }}</span></td>
+                <td>{{ reporte_equipo.inventario_numero }}</td>
+                <td>{{ reporte_equipo.falla_descripcion[:70] }}...</td>
+                <td>{{ reporte_equipo.fecha_reporte.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('editar_reporte_equipo', reporte_id=reporte_equipo.id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit me-1"></i> Gestionar
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-success text-center" role="alert">
+    <i class="fas fa-check-circle me-1"></i> ¡Excelente! No hay reportes de equipos pendientes en tu sector ({{ user.sector }}).
+</div>
+{% endif %}
+
+<h2 class="mt-5 text-danger"><i class="fas fa-car me-2"></i> Reportes de Patrullas Pendientes</h2>
+
+{% if pendientes_patrulla %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-danger">
+            <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Unidad</th>
+                <th>Cámaras con Falla</th>
+                <th>Descripción Adicional</th>
+                <th>Fecha Reporte</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reporte_patrulla in pendientes_patrulla %}
+            <tr>
+                <td>{{ reporte_patrulla.id }}</td>
+                <td><span class="badge bg-secondary">{{ reporte_patrulla.user.username }}</span></td>
+                <td><span class="badge bg-danger">{{ reporte_patrulla.unidad_numero }}</span></td>
+                <td>
+                    {% set camaras_fallidas = [] %}
+                    {% if not reporte_patrulla.camara1_funciona %}{% set _ = camaras_fallidas.append(1) %}{% endif %}
+                    {% if not reporte_patrulla.camara2_funciona %}{% set _ = camaras_fallidas.append(2) %}{% endif %}
+                    {% if not reporte_patrulla.camara3_funciona %}{% set _ = camaras_fallidas.append(3) %}{% endif %}
+                    {% if not reporte_patrulla.camara4_funciona %}{% set _ = camaras_fallidas.append(4) %}{% endif %}
+                    
+                    {% if camaras_fallidas %}
+                        <span class="badge bg-dark">Fallas: {{ camaras_fallidas|join(', ') }}</span>
+                    {% else %}
+                        <span class="badge bg-success">Todas OK</span>
+                    {% endif %}
+                </td>
+                <td>{{ reporte_patrulla.falla_descripcion if reporte_patrulla.falla_descripcion else 'N/A' }}</td>
+                <td>{{ reporte_patrulla.fecha_reporte.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('editar_reporte_patrulla', reporte_id=reporte_patrulla.id) }}" class="btn btn-sm btn-danger">
+                        <i class="fas fa-edit me-1"></i> Gestionar
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-success text-center" role="alert">
+    <i class="fas fa-check-circle me-1"></i> ¡Excelente! No hay reportes de patrullas pendientes en tu sector ({{ user.sector }}).
+</div>
+{% endif %}
+
+<div class="text-center mt-5">
+    <p><a href="{{ url_for('logout') }}" class="btn btn-outline-secondary"><i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión</a></p>
+</div>
+
+{% endblock %}

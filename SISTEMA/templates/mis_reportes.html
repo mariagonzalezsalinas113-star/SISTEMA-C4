@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Reportes{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="fas fa-file-invoice me-2"></i> Mis Reportes Levantados</h1>
+
+<div class="card bg-light p-3 mb-5 shadow-sm">
+    <p class="mb-0">Aquí puedes revisar el estado y el historial de todos los tickets que has generado en tu sector ({{ user.sector }}).</p>
+</div>
+
+<!-- ================================================================= -->
+<!-- SECCIÓN DE REPORTES DE EQUIPO (Radios, GPS, etc.) -->
+<!-- ================================================================= -->
+<h2 class="mt-4 text-info"><i class="fas fa-headset me-2"></i> Reportes de Equipo</h2>
+<hr>
+
+{% if equipos %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-info">
+                <tr>
+                    <th>ID</th>
+                    <th>Inventario</th>
+                    <th>Falla Reportada</th>
+                    <th>Fecha Reporte</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reporte in equipos %}
+                <tr>
+                    <td>{{ reporte.id }}</td>
+                    <td><span class="badge bg-secondary">{{ reporte.inventario_numero }}</span></td>
+                    <td>{{ reporte.falla_descripcion[:50] }}...</td>
+                    <td>{{ reporte.fecha_reporte.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        {% if reporte.estado == 'Pendiente' %}
+                            <span class="badge bg-danger"><i class="fas fa-clock me-1"></i> Pendiente</span>
+                        {% elif reporte.estado == 'En Proceso' %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-wrench me-1"></i> En Proceso</span>
+                        {% else %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Reparado</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info text-center" role="alert">
+        <i class="fas fa-info-circle me-1"></i> No tienes reportes de equipo registrados actualmente.
+    </div>
+{% endif %}
+
+<!-- ================================================================= -->
+<!-- SECCIÓN DE REPORTES DE PATRULLA (Cámaras) -->
+<!-- ================================================================= -->
+<h2 class="mt-5 text-danger"><i class="fas fa-car me-2"></i> Reportes de Patrulla</h2>
+<hr>
+
+{% if patrullas %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-danger">
+                <tr>
+                    <th>ID</th>
+                    <th>Unidad</th>
+                    <th>Cámaras OK / Fallas</th>
+                    <th>Descripción Adicional</th>
+                    <th>Fecha Reporte</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reporte in patrullas %}
+                <tr>
+                    <td>{{ reporte.id }}</td>
+                    <td><span class="badge bg-danger">{{ reporte.unidad_numero }}</span></td>
+                    <td>
+                        {% set camaras_fallidas = [] %}
+                        {% if not reporte.camara1_funciona %}{% set _ = camaras_fallidas.append(1) %}{% endif %}
+                        {% if not reporte.camara2_funciona %}{% set _ = camaras_fallidas.append(2) %}{% endif %}
+                        {% if not reporte.camara3_funciona %}{% set _ = camaras_fallidas.append(3) %}{% endif %}
+                        {% if not reporte.camara4_funciona %}{% set _ = camaras_fallidas.append(4) %}{% endif %}
+                        
+                        {% if camaras_fallidas %}
+                            <span class="badge bg-dark">Fallas: {{ camaras_fallidas|join(', ') }}</span>
+                        {% else %}
+                            <span class="badge bg-success">Todas OK</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ reporte.falla_descripcion if reporte.falla_descripcion else 'N/A' }}</td>
+                    <td>{{ reporte.fecha_reporte.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                         {% if reporte.estado == 'Pendiente' %}
+                            <span class="badge bg-danger"><i class="fas fa-clock me-1"></i> Pendiente</span>
+                        {% elif reporte.estado == 'En Proceso' %}
+                            <span class="badge bg-warning text-dark"><i class="fas fa-wrench me-1"></i> En Proceso</span>
+                        {% else %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Reparado</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-danger text-center" role="alert">
+        <i class="fas fa-info-circle me-1"></i> No tienes reportes de patrulla registrados actualmente.
+    </div>
+{% endif %}
+
+<div class="mt-5 text-center">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg">
+        <i class="fas fa-arrow-left me-2"></i> Volver al Dashboard
+    </a>
+</div>
+{% endblock %}

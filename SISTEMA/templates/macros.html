@@ -1,0 +1,26 @@
+{# 
+    Este archivo contiene macros (funciones) reutilizables para renderizar
+    elementos comunes, como campos de formulario.
+    Esta macro 'form_field' es típica cuando se usa Flask-WTF.
+#}
+{% macro form_field(field) %}
+    <div class="form-group">
+        <label class="form-label" for="{{ field.id }}">
+            <i class="fas fa-fw fa-tag"></i> {{ field.label }}
+            {% if field.flags.required %}<span class="required-star">*</span>{% endif %}
+        </label>
+
+        {# Renderiza el campo. El 'extra_classes' se añade a veces para personalizar #}
+        {{ field(class="form-control", **kwargs) }} 
+
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <div class="form-hint" style="color: var(--danger-color);"><i class="fas fa-exclamation-triangle"></i><span>{{ error }}</span></div>
+            {% endfor %}
+        {% endif %}
+        
+        {% if field.description %}
+            <div class="form-hint"><i class="fas fa-info-circle"></i><span>{{ field.description }}</span></div>
+        {% endif %}
+    </div>
+{% endmacro %}
