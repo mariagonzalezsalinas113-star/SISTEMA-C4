@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuario | Sistema C4</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen py-6 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+            <div class="mb-6">
+                <a href="{{ url_for('admin_usuarios') }}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center mb-4">
+                    ← Volver a Usuarios
+                </a>
+                <h1 class="text-3xl font-bold text-gray-900">Editar Usuario</h1>
+                <p class="text-gray-600 mt-2">Modifica la información del usuario</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'danger' %}bg-red-100 text-red-800{% elif category == 'warning' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Formulario -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-indigo-600 text-white">
+                    <h2 class="text-xl font-semibold">Información del Usuario</h2>
+                </div>
+                
+                <form method="POST" action="{{ url_for('admin_editar_usuario', user_id=usuario.id) }}" class="p-6 space-y-6">
+                    <!-- Usuario -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                            Usuario <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               value="{{ usuario.username }}"
+                               required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Nombre de usuario para iniciar sesión</p>
+                    </div>
+
+                    <!-- Rol -->
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                            Rol <span class="text-red-500">*</span>
+                        </label>
+                        <select id="role" 
+                                name="role" 
+                                required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            {% for rol in roles %}
+                            <option value="{{ rol }}" {% if usuario.role == rol %}selected{% endif %}>
+                                {{ rol }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <strong>Admin:</strong> Acceso completo | 
+                            <strong>Tecnico:</strong> Gestión de reportes | 
+                            <strong>Usuario:</strong> Crear reportes
+                        </p>
+                    </div>
+
+                    <!-- Sector -->
+                    <div>
+                        <label for="sector" class="block text-sm font-medium text-gray-700 mb-2">
+                            Sector
+                        </label>
+                        <input type="text" 
+                               id="sector" 
+                               name="sector" 
+                               value="{{ usuario.sector or '' }}"
+                               placeholder="Ej: 1, 2, Global, Administracion Central"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">
+                            Sector asignado (deja en blanco si no aplica). 
+                            Los técnicos con sector "Global" ven todos los reportes.
+                        </p>
+                    </div>
+
+                    <!-- Nueva Contraseña -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nueva Contraseña
+                        </label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               placeholder="Dejar en blanco para mantener la actual"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">
+                            Solo completa este campo si deseas cambiar la contraseña
+                        </p>
+                    </div>
+
+                    <!-- Información del Usuario -->
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Información Actual</h3>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                                <span class="text-gray-600">ID:</span>
+                                <span class="font-medium text-gray-900">#{{ usuario.id }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Rol Actual:</span>
+                                <span class="font-medium text-gray-900">{{ usuario.role }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Usuario:</span>
+                                <span class="font-medium text-gray-900">{{ usuario.username }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Sector Actual:</span>
+                                <span class="font-medium text-gray-900">{{ usuario.sector or 'Sin asignar' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" 
+                                class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition font-medium">
+                            💾 Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('admin_usuarios') }}" 
+                           class="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-300 transition font-medium text-center">
+                            ✕ Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Advertencia -->
+            <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Advertencia</h3>
+                        <p class="text-sm text-yellow-700 mt-1">
+                            Los cambios en el rol o sector afectarán inmediatamente el acceso del usuario al sistema.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Validación del formulario antes de enviar
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
+            const role = document.getElementById('role').value;
+
+            if (!username) {
+                e.preventDefault();
+                alert('El nombre de usuario es obligatorio');
+                return;
+            }
+
+            if (!role) {
+                e.preventDefault();
+                alert('Debes seleccionar un rol');
+                return;
+            }
+
+            // Confirmación si está cambiando el rol
+            const rolActual = '{{ usuario.role }}';
+            if (role !== rolActual) {
+                if (!confirm(`¿Estás seguro de cambiar el rol de "${rolActual}" a "${role}"?`)) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

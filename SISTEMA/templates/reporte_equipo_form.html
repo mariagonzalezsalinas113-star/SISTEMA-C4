@@ -1,462 +1,241 @@
-{% extends 'base.html' %}
-
-{% block title %}Reporte de Equipos{% endblock %}
-
-{% block content %}
-<style>
-    :root {
-        --primary-color: #13158d;
-        --success-color: #10b981;
-        --warning-color: #9c6300;
-        --danger-color: #ef4444;
-    }
-    
-    body {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
-    }
-    
-    .container-main {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-    }
-    
-    .card-main {
-        background: white;
-        border-radius: 1.5rem;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        animation: slideUp 0.5s ease-out;
-    }
-    
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .header-section {
-        background: linear-gradient(135deg, #0b22f5 0%, #069dd9 100%);
-        padding: 2rem;
-        color: white;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .header-section::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 300px;
-        height: 300px;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: pulse 4s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-    }
-    
-    .header-section h2 {
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        position: relative;
-        z-index: 1;
-    }
-    
-    .header-section p {
-        opacity: 0.95;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .form-section {
-        padding: 2.5rem;
-    }
-    
-    .info-banner {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border-left: 4px solid var(--warning-color);
-        padding: 1.25rem;
-        border-radius: 0.75rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 6px rgba(245, 158, 11, 0.1);
-    }
-    
-    .form-group {
-        margin-bottom: 1.75rem;
-    }
-    
-    .form-label {
-        display: block;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
-    }
-    
-    .form-label i {
-        color: var(--warning-color);
-        margin-right: 0.5rem;
-    }
-    
-    .required-star {
-        color: var(--danger-color);
-        margin-left: 0.25rem;
-    }
-    
-    .form-control {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 0.75rem;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background: white;
-    }
-    
-    .form-control:focus {
-        outline: none;
-        border-color: var(--warning-color);
-        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
-        transform: translateY(-1px);
-    }
-    
-    .form-control.error {
-        border-color: var(--danger-color);
-        background-color: #fef2f2;
-    }
-    
-    .form-hint {
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-    }
-    
-    .form-hint i {
-        margin-right: 0.5rem;
-        color: var(--primary-color);
-    }
-    
-    .btn-submit {
-        width: 100%;
-        padding: 1.25rem;
-        background: linear-gradient(135deg, #0b5cb8 0%, #032ce0 100%);
-        color: white;
-        border: none;
-        border-radius: 0.875rem;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .btn-submit::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-        transition: left 0.5s ease;
-    }
-    
-    .btn-submit:hover::before {
-        left: 100%;
-    }
-    
-    .btn-submit:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4);
-    }
-    
-    .btn-submit:active {
-        transform: translateY(-1px);
-    }
-    
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        color: var(--primary-color);
-        font-weight: 600;
-        text-decoration: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
-        transition: all 0.3s ease;
-        margin-top: 1.5rem;
-    }
-    
-    .back-link:hover {
-        background-color: #eef2ff;
-        transform: translateX(-5px);
-    }
-    
-    .modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(17, 24, 39, 0.85);
-        backdrop-filter: blur(4px);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        padding: 1rem;
-    }
-    
-    .modal.active {
-        display: flex;
-        animation: fadeIn 0.3s ease-out;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    .modal-content {
-        background: white;
-        border-radius: 1.5rem;
-        max-width: 600px;
-        width: 100%;
-        padding: 2rem;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        animation: modalSlideUp 0.4s ease-out;
-    }
-    
-    @keyframes modalSlideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-    
-    .modal-header {
-        text-align: center;
-        margin-bottom: 1.5rem;
-    }
-    
-    .modal-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-    
-    .btn-close-modal {
-        width: 100%;
-        padding: 1rem;
-        background: var(--danger-color);
-        color: white;
-        border: none;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-close-modal:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-    }
-</style>
-
-<div class="container-main">
-    <div class="card-main">
-
-        <div class="header-section">
-            <h2>
-                <i class="fas fa-tools"></i> Reporte de Falla de Activos
-            </h2>
-            <p>Sistema de gestión y control de equipos operacionales</p>
-        </div>
-
-        <div class="form-section">
-
-            <div class="info-banner">
-                <div style="display: flex; align-items: start;">
-                    <i class="fas fa-info-circle" style="font-size: 1.25rem; margin-right: 0.75rem; margin-top: 0.125rem;"></i>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportar Equipo | Sistema de Tickets</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen py-8 px-4">
+        <div class="max-w-3xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
+                <div class="flex justify-between items-center">
                     <div>
-                        <strong style="display: block; margin-bottom: 0.25rem;">Reportando como:</strong>
-                        <span>{{ current_user.username }}</span>
-                        <span style="margin: 0 0.5rem;">•</span>
-                        <span>Sector: {{ current_user.sector or 'No Asignado' }}</span>
+                        <h1 class="text-3xl font-bold text-blue-700 mb-2">💻 Reportar Equipo</h1>
+                        <p class="text-gray-600">Complete el formulario para reportar una falla o solicitud de mantenimiento</p>
                     </div>
+                    <a href="{{ url_for('oficial_dashboard') }}" 
+                       class="text-indigo-600 hover:text-indigo-800 font-medium">
+                        ← Volver al Dashboard
+                    </a>
                 </div>
             </div>
 
-            <form id="equipment-form" method="POST" action="{{ url_for('reporte_equipo_form') }}">
-
-                <div class="form-group">
-                    <label class="form-label" for="tipo">
-                        <i class="fas fa-laptop"></i>
-                        Tipo de Equipo
-                        <span class="required-star">*</span>
-                    </label>
-                    <select id="tipo" name="tipo" class="form-control" required>
-                        <option value="">Seleccione el tipo de activo...</option>
-                        <option value="Computadora">💻 Computadora (Desktop/Laptop)</option>
-                        <option value="Impresora">🖨️ Impresora / Multifuncional</option>
-                        <option value="Servidor">🖥️ Servidor / Rack</option>
-                        <option value="Equipo de Red">📡 Equipo de Red (Switch, Router, AP)</option>
-                        <option value="Radio">📻 Radio de Comunicación</option>
-                        <option value="Otro">📦 Otro/No listado</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="serie">
-                        <i class="fas fa-barcode"></i>
-                        No. de Serie / ID de Inventario
-                        <span class="required-star">*</span>
-                    </label>
-                    <input id="serie" name="serie" type="text" class="form-control" placeholder="Ej: ABC123456 o ID interno" required>
-                    <div class="form-hint">
-                        <i class="fas fa-lightbulb"></i>
-                        <span>Este identificador es crucial para localizar el activo</span>
+            <!-- Mensajes Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'danger' %}bg-red-100 text-red-800{% elif category == 'warning' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ message }}
                     </div>
-                </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
-                <div class="form-group">
-                    <label class="form-label" for="estado">
-                        <i class="fas fa-clipboard-check"></i>
-                        Estado Reportado
-                        <span class="required-star">*</span>
-                    </label>
-                    <select id="estado" name="estado" class="form-control" required>
-                        <option value="">Seleccione el estado actual...</option>
-                        <option value="operativo">✅ Operativo (Sin Fallas)</option>
-                        <option value="falla_menor">⚠️ Falla Menor (Funciona con problemas)</option>
-                        <option value="falla_grave">🛑 Falla Grave (Inoperable)</option>
-                        <option value="mantenimiento">⚙️ Requiere Mantenimiento Preventivo</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="comentarios">
-                        <i class="fas fa-comment-alt"></i>
-                        Descripción Detallada de la Falla
-                        <span id="comentarios-required-star"></span>
-                    </label>
-                    <textarea id="comentarios" name="comentarios" class="form-control" rows="5" placeholder="Describe exactamente qué sucede, cuándo ocurre y si hay mensajes de error..."></textarea>
-                    <div class="form-hint" id="comentarios-hint">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Proporciona la mayor cantidad de detalles posible</span>
+            <!-- Formulario Principal -->
+            <div class="bg-white rounded-lg shadow-xl p-6">
+                <form method="POST" enctype="multipart/form-data" id="reporteForm">
+                    
+                    <!-- Tipo de Equipo -->
+                    <div class="mb-6">
+                        <label for="tipo" class="block text-sm font-bold text-gray-700 mb-2">
+                            Tipo de Equipo <span class="text-red-500">*</span>
+                        </label>
+                        <select name="tipo" id="tipo" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">-- Seleccione un tipo --</option>
+                            <option value="Computadora de Escritorio">💻 Computadora de Escritorio</option>
+                            <option value="Laptop">💼 Laptop</option>
+                            <option value="Monitor">🖥️ Monitor</option>
+                            <option value="Impresora">🖨️ Impresora</option>
+                            <option value="Scanner">📠 Scanner</option>
+                            <option value="Router">📡 Router</option>
+                            <option value="Switch">🔌 Switch</option>
+                            <option value="Teléfono IP">☎️ Teléfono IP</option>
+                            <option value="UPS">🔋 UPS / Regulador</option>
+                            <option value="Proyector">📽️ Proyector</option>
+                            <option value="Otro">⚙️ Otro Equipo</option>
+                        </select>
                     </div>
-                </div>
 
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-paper-plane" style="margin-right: 0.75rem;"></i>
-                    Enviar Reporte de Equipo
-                </button>
-            </form>
+                    <!-- Número de Serie/Inventario -->
+                    <div class="mb-6">
+                        <label for="serie" class="block text-sm font-bold text-gray-700 mb-2">
+                            Número de Serie o Inventario <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="serie" id="serie" required
+                               placeholder="Ej: INV-2024-001 o SN123456789"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">
+                            💡 Busque la etiqueta de inventario o el número de serie en el equipo
+                        </p>
+                    </div>
 
-            <div style="text-align: center;">
-                <a href="{{ url_for('oficial_dashboard') }}" class="back-link">
-                    <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
-                    Volver al Panel Principal
-                </a>
+                    <!-- Estado del Equipo -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-3">
+                            Estado del Equipo <span class="text-red-500">*</span>
+                        </label>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300 transition">
+                                <input type="radio" name="estado" value="operativo" required
+                                       class="w-5 h-5 text-green-600" onchange="toggleComentarios()">
+                                <div class="ml-3">
+                                    <div class="font-semibold text-gray-900">✅ Operativo</div>
+                                    <div class="text-sm text-gray-600">El equipo funciona correctamente</div>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-yellow-50 hover:border-yellow-300 transition">
+                                <input type="radio" name="estado" value="falla_menor" required
+                                       class="w-5 h-5 text-yellow-600" onchange="toggleComentarios()">
+                                <div class="ml-3">
+                                    <div class="font-semibold text-gray-900">⚠️ Falla Menor</div>
+                                    <div class="text-sm text-gray-600">Problemas que no impiden su uso básico</div>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-red-50 hover:border-red-300 transition">
+                                <input type="radio" name="estado" value="falla_grave" required
+                                       class="w-5 h-5 text-red-600" onchange="toggleComentarios()">
+                                <div class="ml-3">
+                                    <div class="font-semibold text-gray-900">🔴 Falla Grave</div>
+                                    <div class="text-sm text-gray-600">El equipo no puede utilizarse</div>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition">
+                                <input type="radio" name="estado" value="mantenimiento" required
+                                       class="w-5 h-5 text-blue-600" onchange="toggleComentarios()">
+                                <div class="ml-3">
+                                    <div class="font-semibold text-gray-900">🔧 Requiere Mantenimiento</div>
+                                    <div class="text-sm text-gray-600">Limpieza, actualización o revisión preventiva</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Descripción del Problema -->
+                    <div class="mb-6" id="comentariosSection" style="display: none;">
+                        <label for="comentarios" class="block text-sm font-bold text-gray-700 mb-2">
+                            Descripción del Problema <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="comentarios" id="comentarios" rows="5"
+                                  placeholder="Describa detalladamente el problema o solicitud:
+- ¿Qué sucede exactamente?
+- ¿Cuándo comenzó el problema?
+- ¿Hay mensajes de error?
+- ¿El problema es constante o intermitente?"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">
+                            💡 Entre más detalles proporcione, más rápido podremos ayudarle
+                        </p>
+                    </div>
+
+                    <!-- Información Adicional -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">
+                                    <strong>Nota:</strong> Si el equipo está operativo, no se generará un ticket. 
+                                    Solo se registrarán los reportes que requieran atención técnica.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información del Usuario (Automática) -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+                        <h3 class="font-semibold text-gray-700 mb-2">📋 Información del Reporte</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span class="text-gray-600">Usuario:</span>
+                                <span class="font-medium text-gray-900">{{ current_user.username }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Sector:</span>
+                                <span class="font-medium text-gray-900">{{ current_user.sector or 'Sin Sector' }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Fecha:</span>
+                                <span class="font-medium text-gray-900">{{ now().strftime('%d/%m/%Y') }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Hora:</span>
+                                <span class="font-medium text-gray-900">{{ now().strftime('%H:%M') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="flex gap-3">
+                        <button type="submit" 
+                                class="flex-1 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
+                            📤 Enviar Reporte
+                        </button>
+                        <a href="{{ url_for('oficial_dashboard') }}" 
+                           class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition text-center">
+                            ❌ Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
 
+            <!-- Ayuda Rápida -->
+            <div class="mt-6 bg-white rounded-lg shadow-lg p-4">
+                <h3 class="font-bold text-gray-800 mb-2">❓ ¿Necesitas Ayuda?</h3>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li>• Si no encuentras el número de inventario, contacta a tu supervisor</li>
+                    <li>• Para fallas graves, considera reportar también por teléfono</li>
+                    <li>• Puedes revisar el estado de tus reportes en "Mis Reportes"</li>
+                </ul>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="message-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-icon">
-                <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
-            </div>
-            <h3 style="color: var(--danger-color); margin-bottom: 0.5rem;">Error de Validación</h3>
-            <p style="color: #6b7280; font-size: 0.95rem;" id="modal-error-message">Por favor, corrige el siguiente problema.</p>
-        </div>
-        
-        <div class="modal-footer">
-            <button id="modal-close-btn" class="btn-close-modal">
-                <i class="fas fa-undo" style="margin-right: 0.5rem;"></i>
-                Volver al Formulario
-            </button>
-        </div>
-    </div>
-</div>
+    <script>
+        function toggleComentarios() {
+            const estadoSeleccionado = document.querySelector('input[name="estado"]:checked').value;
+            const comentariosSection = document.getElementById('comentariosSection');
+            const comentariosTextarea = document.getElementById('comentarios');
 
-<script>
-    const form = document.getElementById("equipment-form");
-    const estadoSelect = document.getElementById("estado");
-    const comentariosTextarea = document.getElementById("comentarios");
-    const modal = document.getElementById("message-modal");
-    const comentariosRequiredStar = document.getElementById("comentarios-required-star");
-    const comentariosHint = document.getElementById("comentarios-hint");
-    const modalErrorMessage = document.getElementById('modal-error-message');
-
-    function showModal(message) {
-        modalErrorMessage.textContent = message;
-        modal.classList.add('active');
-    }
-
-    function closeModal() {
-        modal.classList.remove('active');
-    }
-
-    function validateForm(e) {
-        const estado = estadoSelect.value;
-        const comentarios = comentariosTextarea.value.trim();
-        const isFalla = ['falla_menor', 'falla_grave', 'mantenimiento'].includes(estado);
-        
-        if (!form.checkValidity()) {
-            return true; 
+            if (estadoSeleccionado === 'operativo') {
+                comentariosSection.style.display = 'none';
+                comentariosTextarea.removeAttribute('required');
+            } else {
+                comentariosSection.style.display = 'block';
+                comentariosTextarea.setAttribute('required', 'required');
+            }
         }
 
-        if (isFalla && !comentarios) {
-            e.preventDefault();
-            comentariosTextarea.classList.add('error');
-            showModal("Para el estado seleccionado (Falla/Mantenimiento), es OBLIGATORIO describir el problema en detalle.");
-            return false;
-        }
-        
-        comentariosTextarea.classList.remove('error');
-        return true;
-    }
+        // Validación del formulario
+        document.getElementById('reporteForm').addEventListener('submit', function(e) {
+            const estadoSeleccionado = document.querySelector('input[name="estado"]:checked');
+            
+            if (!estadoSeleccionado) {
+                e.preventDefault();
+                alert('Por favor, seleccione el estado del equipo');
+                return false;
+            }
 
-    estadoSelect.addEventListener('change', () => {
-        const estado = estadoSelect.value;
-        const isFalla = ['falla_menor', 'falla_grave', 'mantenimiento'].includes(estado);
-        
-        if (isFalla) {
-            comentariosRequiredStar.innerHTML = '<span class="required-star">*</span>';
-            comentariosTextarea.setAttribute('placeholder', 'Descripción OBLIGATORIA: Detalla el problema observado...');
-            comentariosHint.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>Este campo es obligatorio para el estado seleccionado</span>';
-        } else {
-            comentariosRequiredStar.innerHTML = '';
-            comentariosTextarea.setAttribute('placeholder', 'Comentarios adicionales (opcional)...');
-            comentariosHint.innerHTML = '<i class="fas fa-info-circle"></i><span>Proporciona detalles adicionales si es necesario</span>';
-        }
-    });
+            const estado = estadoSeleccionado.value;
+            const comentarios = document.getElementById('comentarios').value.trim();
 
-    document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-    form.addEventListener('submit', validateForm);
-    
-    window.onload = () => {
-        estadoSelect.dispatchEvent(new Event('change'));
-    };
-</script>
+            if (estado !== 'operativo' && !comentarios) {
+                e.preventDefault();
+                alert('Por favor, describa el problema o solicitud');
+                return false;
+            }
 
-{% endblock %}
+            return true;
+        });
+    </script>
+</body>
+</html>

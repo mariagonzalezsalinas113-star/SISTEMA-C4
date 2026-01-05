@@ -3,63 +3,152 @@
 {% block title %}Dashboard Usuario{% endblock %}
 
 {% block content %}
+<style>
+    :root {
+        --primary-dark: #2c3e50;
+        --accent-blue: #3498db;
+        --border-color: #e9ecef;
+    }
 
-<h1 class="mb-4">
-    <i class="fas fa-id-badge me-2"></i> Panel de Usuario / Oficial
-</h1>
+    .dashboard-wrapper {
+        background-color: #f8f9fa;
+        border-radius: 20px;
+        padding: 30px;
+        margin-top: 20px;
+    }
 
-<div class="card bg-success text-white shadow-sm mb-4">
-    <div class="card-body">
-        <h5 class="card-title"><i class="fas fa-user-circle me-2"></i> Bienvenido, {{ user.username }}</h5>
-        <p class="card-text">Tu sector de operación es: <strong>{{ user.sector }}</strong>.</p>
-        <p class="card-text">Utiliza las opciones a continuación para reportar fallas en equipos o patrullas.</p>
+    .user-profile-mini {
+        background: white;
+        border-radius: 15px;
+        border-left: 6px solid var(--accent-blue);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.322);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        border-color: var(--accent-blue);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Línea de color superior según la categoría */
+    .stat-card.equipo { border-top: 4px solid #17a2b8; }
+    .stat-card.patrulla { border-top: 4px solid #dc3545; }
+    .stat-card.historial { border-top: 4px solid #6c757d; }
+
+    .btn-action {
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 12px;
+        transition: all 0.2s;
+    }
+
+    .icon-shape {
+        width: 60px;
+        height: 60px;
+        background: #f1f4f8;
+        color: var(--primary-dark);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-weight: 700;
+        color: var(--primary-dark);
+        letter-spacing: -0.5px;
+    }
+</style>
+
+<div class="dashboard-wrapper shadow-sm">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h2 class="section-title mb-1">Terminal de Operaciones</h2>
+            <p class="text-muted small">Bienvenido al sistema de reporte de incidencias técnicas.</p>
+        </div>
+        <div class="col-lg-4 text-md-end">
+            <div class="user-profile-mini p-3 d-inline-block text-start">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=3498db&color=fff" class="rounded-circle" width="45">
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0 fw-bold">{{ user.username }}</h6>
+                        <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">Sector: {{ user.sector }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4 opacity-50">
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card stat-card equipo h-100 p-4">
+                <div class="icon-shape">
+                    <i class="fas fa-walkie-talkie fa-lg text-info"></i>
+                </div>
+                <h5 class="fw-bold">Equipamiento</h5>
+                <p class="text-muted small">Reporte de radios, GPS, PDA y otros accesorios tácticos.</p>
+                <div class="mt-auto">
+                    <a href="{{ url_for('reporte_equipo_form') }}" class="btn btn-info text-white btn-action w-100">
+                        Nuevo Reporte <i class="fas fa-chevron-right ms-2 small"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card stat-card patrulla h-100 p-4">
+                <div class="icon-shape">
+                    <i class="fas fa-shield-alt fa-lg text-danger"></i>
+                </div>
+                <h5 class="fw-bold">Unidad Móvil</h5>
+                <p class="text-muted small">Cámaras vehiculares, DVR, luces y sistemas integrados.</p>
+                <div class="mt-auto">
+                    <a href="{{ url_for('reporte_patrulla_form') }}" class="btn btn-danger btn-action w-100">
+                        Reportar Falla <i class="fas fa-chevron-right ms-2 small"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card stat-card historial h-100 p-4">
+                <div class="icon-shape">
+                    <i class="fas fa-layer-group fa-lg text-secondary"></i>
+                </div>
+                <h5 class="fw-bold">Mis Folios</h5>
+                <p class="text-muted small">Seguimiento en tiempo real de tus reportes enviados.</p>
+                <div class="mt-auto">
+                    <a href="{{ url_for('mis_reportes') }}" class="btn btn-outline-dark btn-action w-100">
+                        Ver Mis Reportes <i class="fas fa-history ms-2 small"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 p-4 bg-white border-radius-15 rounded-4 border">
+        <div class="row align-items-center text-center text-md-start">
+            <div class="col-md-1 text-center">
+                <i class="fas fa-info-circle fa-2x text-primary"></i>
+            </div>
+            <div class="col-md-11">
+                <h6 class="mb-1 fw-bold">Recordatorio Operativo</h6>
+                <p class="text-muted small mb-0">Cada reporte genera un folio único de seguimiento. Asegúrate de adjuntar fotos si el sistema lo solicita.</p>
+            </div>
+        </div>
     </div>
 </div>
-
-<div class="row g-4">
-
-    <!-- Reportar Falla de Equipo -->
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-headset fa-3x text-info mb-3"></i>
-                <h5 class="card-title text-info">Reportar Falla de Equipo</h5>
-                <p class="card-text small">Radios, GPS, PDA, chalecos, etc.</p>
-                <a href="{{ url_for('reporte_equipo_form') }}" class="btn btn-info text-white mt-2">
-                    <i class="fas fa-plus-circle me-1"></i> Crear Reporte
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reportar Falla de Patrulla -->
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-car fa-3x text-danger mb-3"></i>
-                <h5 class="card-title text-danger">Reportar Falla de Patrulla</h5>
-                <p class="card-text small">Cámaras, DVR, pantallas, etc.</p>
-                <a href="{{ url_for('reporte_patrulla_form') }}" class="btn btn-danger mt-2">
-                    <i class="fas fa-plus-circle me-1"></i> Crear Reporte
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ver Mis Reportes -->
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-list-alt fa-3x text-secondary mb-3"></i>
-                <h5 class="card-title text-secondary">Ver Mis Reportes</h5>
-                <p class="card-text small">Consulta el estado de tus reportes enviados.</p>
-                <a href="{{ url_for('mis_reportes') }}" class="btn btn-secondary mt-2">
-                    <i class="fas fa-search me-1"></i> Revisar Historial
-                </a>
-            </div>
-        </div>
-    </div>
-
-</div>
-
 {% endblock %}

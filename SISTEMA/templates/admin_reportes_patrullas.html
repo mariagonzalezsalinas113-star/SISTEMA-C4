@@ -171,7 +171,7 @@
                                 <div class="truncate-text" id="desc-{{ reporte[0].id }}">
                                     {{ reporte[0].falla_descripcion }}
                                 </div>
-                                <button onclick="toggleDescripcion-({{reporte[0].id}})" 
+                                <button onclick="toggleDescripcion-({{reporte[0].id}})"
                                         class="text-red-600 hover:text-red-800 text-xs mt-1 font-medium">
                                     Ver más ↓
                                 </button>
@@ -180,14 +180,14 @@
                             {% endif %}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <select onchange="cambiarEstado({{reporte[0].id}},this.value)" 
+                            <select onchange="cambiarEstado,({{reporte[0].id}}this.value)";
                                     class="px-2 py-1 text-xs leading-5 font-semibold rounded-full border-0 cursor-pointer
                                     {% if reporte[0].estado == 'En Proceso' %} bg-yellow-100 text-yellow-800
                                     {% elif reporte[0].estado == 'Cerrado' %} bg-green-100 text-green-800
                                     {% else %} bg-red-100 text-red-800 {% endif %}">
-                                <option value="Pendiente" {% if reporte[0].estado == 'Pendiente' %}selected{% endif %}>⏳ Pendiente</option>
-                                <option value="En Proceso" {% if reporte[0].estado == 'En Proceso' %}selected{% endif %}>🔧 En Proceso</option>
-                                <option value="Cerrado" {% if reporte[0].estado == 'Cerrado' %}selected{% endif %}>✅ Cerrado</option>
+                                <option value="Pendiente" {% if reporte[0].estado =='Pendiente' %}selected{% endif %}>⏳ Pendiente</option>
+                                <option value="En Proceso" {% if reporte[0].estado =='En Proceso' %}selected{% endif %}>🔧 En Proceso</option>
+                                <option value="Cerrado" {% if reporte[0].estado =='Cerrado' %}selected{% endif %}>✅ Cerrado</option>
                             </select>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm">
@@ -196,7 +196,7 @@
                                    class="text-red-600 hover:text-red-900 font-medium" title="Ver detalle">
                                     👁️ Ver
                                 </a>
-                                <button onclick="confirmarEliminar({{ reporte[0].id }})" 
+                                <button onclick="confirmarEliminar({{reporte[0].id }})";
                                         class="text-gray-600 hover:text-gray-900" title="Eliminar">
                                     🗑️
                                 </button>
@@ -249,10 +249,9 @@
                        class="flex-1 text-center px-3 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700">
                         Ver Detalle
                     </a>
-                    <button onclick="confirmarEliminar({{ reporte[0].id }})" 
-                            class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300">
-                        🗑️
-                    </button>
+                 <button onclick="confirmarEliminar('{{ reporte[0].id }}')"
+                      class="text-gray-600 hover:text-gray-900" title="Eliminar">🗑️
+                     </button>
                 </div>
             </div>
             {% endfor %}
