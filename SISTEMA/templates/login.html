@@ -4,6 +4,8 @@
 
 {% block content %}
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
     /* Reset y configuración base */
     body {
@@ -14,11 +16,9 @@
         justify-content: center;
         position: relative;
         overflow: hidden;
-        /* Asegurarse de usar la fuente Poppins si se incluyó en base.html */
         font-family: 'Poppins', sans-serif; 
     }
     
-    /* Efecto de partículas mejorado con múltiples capas */
     body::before {
         content: '';
         position: absolute;
@@ -33,31 +33,9 @@
         opacity: 0.6;
     }
     
-    body::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 150%;
-        height: 150%;
-        background: radial-gradient(circle, rgba(99, 101, 241, 0.068) 0%, transparent 70%);
-        animation: pulseGlow 8s ease-in-out infinite;
-    }
-    
     @keyframes particleMove {
         0% { transform: translate(0, 0) rotate(0deg); }
         100% { transform: translate(50px, 50px) rotate(360deg); }
-    }
-    
-    @keyframes pulseGlow {
-        0%, 100% { 
-            transform: scale(1) translate(0, 0);
-            opacity: 0.3;
-        }
-        50% { 
-            transform: scale(1.2) translate(-10%, -10%);
-            opacity: 0.5;
-        }
     }
     
     .login-container {
@@ -66,403 +44,70 @@
         width: 100%;
     }
     
-    /* Card principal con glassmorphism */
     .card {
         border-radius: 2rem;
-        box-shadow: 
-            0 25px 50px -12px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(255, 255, 255, 0.05),
-            inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         border: none;
         backdrop-filter: blur(20px) saturate(180%);
         background: rgba(255, 255, 255, 0.97);
         overflow: hidden;
         animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        position: relative;
-    }
-    
-    /* Brillo sutil en el borde del card */
-    .card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, 
-            transparent, 
-            rgba(6, 9, 192, 0.5), 
-            rgba(0, 9, 92, 0.5),
-            transparent
-        );
-        animation: borderShine 3s ease-in-out infinite;
-    }
-    
-    @keyframes borderShine {
-        0%, 100% { opacity: 0.3; }
-        50% { opacity: 1; }
     }
     
     @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(40px) scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
+        from { opacity: 0; transform: translateY(40px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
     }
     
-    /* Header con gradiente moderno */
     .card-header {
-        background: linear-gradient(135deg, 
-            #1e293b 0%, 
-            #334155 50%,
-            #475569 100%
-        );
-        border: none;
+        background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
         padding: 2.5rem 2rem;
-        position: relative;
-        overflow: hidden;
-        color: white; /* Asegurar que el texto dentro del header sea blanco */
-    }
-    
-    /* Efecto de ondas en el header */
-    .card-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: 
-            radial-gradient(circle at center, rgba(99, 102, 241, 0.2) 0%, transparent 50%),
-            radial-gradient(circle at center, rgba(168, 85, 247, 0.15) 0%, transparent 60%);
-        animation: headerPulse 4s ease-in-out infinite;
-    }
-    
-    @keyframes headerPulse {
-        0%, 100% { 
-            transform: translate(0, 0) scale(1); 
-            opacity: 0.5; 
-        }
-        50% { 
-            transform: translate(-5%, -5%) scale(1.15); 
-            opacity: 0.8; 
-        }
-    }
-    
-    /* Contenedor del logo mejorado */
-    .logo-container {
-        margin-bottom: 1.5rem;
-        position: relative;
-        z-index: 1;
-        display: inline-block;
-        animation: logoFloat 3s ease-in-out infinite;
-    }
-    
-    @keyframes logoFloat {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-8px); }
+        color: white;
+        text-align: center;
     }
 
     .logo-img {
         max-width: 140px;
-        height: auto;
         border-radius: 1rem;
-        box-shadow: 
-            0 10px 25px rgba(0, 0, 0, 0.4),
-            0 0 0 3px rgba(255, 255, 255, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        filter: brightness(1.05);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        margin-bottom: 1.5rem;
     }
     
-    .logo-container:hover .logo-img {
-        transform: scale(1.05);
-        box-shadow: 
-            0 15px 35px rgba(0, 0, 0, 0.5),
-            0 0 0 4px rgba(255, 255, 255, 0.15);
-    }
+    .card-body { padding: 3rem 2.5rem; }
     
-    .card-header h2 {
-        position: relative;
-        z-index: 1;
-        font-size: 2rem;
-        font-weight: 700;
-        text-shadow: 
-            0 2px 10px rgba(0, 0, 0, 0.3),
-            0 0 30px rgba(0, 2, 100, 0.3);
-        letter-spacing: -0.5px;
-    }
+    .form-label { font-weight: 600; color: #475569; }
     
-    .card-header p {
-        position: relative;
-        z-index: 1;
-        font-size: 0.95rem;
-        letter-spacing: 0.5px;
-    }
+    .input-group-text { background: #f1f5f9; border: 2px solid #e2e8f0; border-right: none; }
+    .form-control { border: 2px solid #e2e8f0; border-left: none; padding: 1rem; }
     
-    /* Body del card */
-    .card-body {
-        padding: 3rem 2.5rem;
-        position: relative;
-    }
-    
-    /* Labels mejorados */
-    .form-label {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #475569;
-        letter-spacing: 0.3px;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    /* Input groups con efecto premium */
-    .input-group {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-radius: 1rem;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-    
-    .input-group:focus-within {
-        transform: translateY(-3px);
-        box-shadow: 
-            0 10px 25px rgba(2, 4, 131, 0.15),
-            0 0 0 3px rgba(0, 3, 153, 0.1);
-    }
-    
-    .input-group-text {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border: 2px solid #e2e8f0;
-        border-right: none;
-        padding: 1rem 1.25rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .input-group:focus-within .input-group-text {
-        background: linear-gradient(135deg, #0608a3 0%, #000fe0d0 100%);
-        border-color: #060874;
-    }
-    
-    .input-group:focus-within .input-group-text i {
-        color: white !important;
-        transform: scale(1.1);
-    }
-    
-    .input-group-text i {
-        font-size: 1.1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        color: #00028f; /* Color original del ícono */
-    }
-    
-    .form-control {
-        border: 2px solid #e2e8f0;
-        border-left: none;
-        padding: 1rem 1.25rem;
-        font-size: 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        background-color: #ffffff;
-    }
-    
-    .form-control:focus {
-        border-color: #0205b1;
-        box-shadow: none;
-        background-color: #faf5ff;
-    }
-    
-    .form-control::placeholder {
-        color: #94a3b8;
-        font-weight: 400;
-    }
-    
-    /* Botón principal mejorado */
     .btn-primary {
         background: linear-gradient(135deg, #0508df 0%, #2c6bf1 50%, #0d3fe4 100%);
         border: none;
         padding: 1.1rem;
-        font-size: 1.1rem;
-        font-weight: 700;
-        letter-spacing: 0.5px;
         border-radius: 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 
-            0 10px 25px rgba(0, 4, 223, 0.596),
-            0 0 0 0 rgba(0, 4, 236, 0.5);
-        position: relative;
-        overflow: hidden;
+        font-weight: 700;
+        box-shadow: 0 10px 25px rgba(0, 4, 223, 0.4);
     }
+
+    .card-footer { background: #f8fafc; padding: 1.5rem; border-top: 1px solid rgba(226, 232, 240, 0.5); }
     
-    /* Efecto de brillo en el botón */
-    .btn-primary::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, 
-            transparent, 
-            rgba(255, 255, 255, 0.4), 
-            transparent
-        );
-        transition: left 0.6s ease;
-    }
-    
-    .btn-primary:hover::before {
-        left: 100%;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-4px);
-        box-shadow: 
-            0 15px 35px rgba(0, 4, 233, 0.4),
-            0 0 0 3px rgba(0, 67, 250, 0.2);
-    }
-    
-    .btn-primary:active {
-        transform: translateY(-2px);
-        box-shadow: 
-            0 10px 20px rgba(99, 102, 241, 0.3);
-    }
-    
-    /* Footer del card */
-    .card-footer {
-        background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
-        padding: 1.5rem;
-        border: none;
-        border-top: 1px solid rgba(226, 232, 240, 0.5);
-    }
-    
-    .card-footer a {
+    /* Estilo para que el enlace parezca un botón clicable */
+    .link-contacto {
         color: #0609b9;
         font-weight: 600;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
-        position: relative;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.5rem;
+        cursor: pointer;
+        padding: 5px 10px;
+        transition: all 0.3s;
     }
-    
-    .card-footer a::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #63b8f1, #076aff, #0e42ee);
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .card-footer a:hover {
-        color: #0900ac;
-        background: rgba(99, 102, 241, 0.05);
-    }
-    
-    .card-footer a:hover::after {
-        width: 100%;
-    }
-    
-    /* Alertas mejoradas */
-    .alert {
-        border-radius: 1rem;
-        border: none;
-        padding: 1rem 1.25rem;
-        animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        margin-bottom: 1.5rem;
-    }
-    
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-15px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .alert-danger {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
-        color: #dc2626;
-        border-left: 4px solid #ef4444;
-    }
-    
-    /* Texto de seguridad en la parte inferior */
-    .security-text {
-        animation: fadeIn 1s ease-out 0.5s both;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
+    .link-contacto:hover { background: rgba(6, 9, 185, 0.1); border-radius: 8px; }
+
     .security-text p {
         background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
         padding: 0.75rem 1.5rem;
         border-radius: 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        display: inline-block;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        color: white; /* Asegurar que el texto sea visible */
-    }
-    
-    /* Responsive mejorado */
-    @media (max-width: 768px) {
-        .card-header {
-            padding: 2rem 1.5rem;
-        }
-        
-        .card-header h2 {
-            font-size: 1.75rem;
-        }
-        
-        .card-body {
-            padding: 2rem 1.5rem;
-        }
-        
-        .logo-img {
-            max-width: 110px;
-        }
-    }
-    
-    @media (max-width: 576px) {
-        body {
-            padding: 1rem;
-        }
-        
-        .card-header h2 {
-            font-size: 1.5rem;
-        }
-        
-        .card-body {
-            padding: 1.75rem 1.25rem;
-        }
-        
-        .logo-img {
-            max-width: 100px;
-        }
-        
-        .btn-primary {
-            padding: 1rem;
-            font-size: 1rem;
-        }
-        
-        .input-group-text,
-        .form-control {
-            padding: 0.875rem 1rem;
-        }
+        color: white;
+        font-size: 0.8rem;
     }
 </style>
 
@@ -470,95 +115,81 @@
     <div class="row justify-content-center">
         <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5"> 
             <div class="card">
-                
-                <div class="card-header text-white text-center">
-                    
-                    <div class="logo-container">
-                        <img src="{{ url_for('static', filename='images/LOGO1.PNG') }}" 
-                             alt="Logo de la Aplicación" 
-                             class="logo-img">
-                    </div>
-                    
-                    <h2 class="card-title mb-2">
-                        <i class="fas fa-shield-alt me-2"></i> Sistema de Reportes
-                    </h2>
+                <div class="card-header">
+                    <img src="{{ url_for('static', filename='images/LOGO1.PNG') }}" alt="Logo" class="logo-img">
+                    <h2 class="mb-2"><i class="fas fa-shield-alt me-2"></i> Sistema de Reportes</h2>
                     <p class="mb-0 opacity-90">Gestión y Control de Operaciones</p>
                 </div>
                 
                 <div class="card-body">
-                    
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                    <i class="fas fa-exclamation-circle me-2"></i>
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-
                     <form method="POST" action="{{ url_for('login') }}">
-                        
                         <div class="mb-4">
-                            <label for="username" class="form-label">
-                                <i class="fas fa-user"></i> Usuario
-                            </label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text">
-                                    <i class="fas fa-user text-primary"></i>
-                                </span>
-                                <input type="text" 
-                                       class="form-control" 
-                                       id="username" 
-                                       name="username" 
-                                       placeholder="Ingresa tu nombre de usuario" 
-                                       required 
-                                       autofocus>
+                            <label class="form-label"><i class="fas fa-user"></i> Usuario</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user text-primary"></i></span>
+                                <input type="text" class="form-control" name="username" placeholder="Tu usuario" required autofocus>
                             </div>
                         </div>
-                        
                         <div class="mb-4">
-                            <label for="password" class="form-label">
-                                <i class="fas fa-lock"></i> Contraseña
-                            </label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text">
-                                    <i class="fas fa-key text-primary"></i>
-                                </span>
-                                <input type="password" 
-                                       class="form-control" 
-                                       id="password" 
-                                       name="password" 
-                                       placeholder="Ingresa tu contraseña" 
-                                       required>
+                            <label class="form-label"><i class="fas fa-lock"></i> Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-key text-primary"></i></span>
+                                <input type="password" class="form-control" name="password" placeholder="Tu contraseña" required>
                             </div>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 py-3 mt-3">
-                            <i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión
-                        </button>
+                        <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                     </form>
-
                 </div>
                 
                 <div class="card-footer text-center">
                     <p class="mb-0 text-muted small">
                         ¿Problemas para acceder? 
-                        <a href="#" class="ms-1">Contacta al administrador</a>
+                        <a onclick="abrirContacto()" class="link-contacto">Contacta al administrador</a>
                     </p>
                 </div>
-                
             </div>
             
             <div class="text-center mt-4 security-text">
-                <p class="text-white small mb-1">
-                    <i class="fas fa-shield-alt me-2"></i> 
-                    Sistema seguro con encriptación de datos
-                </p>
+                <p><i class="fas fa-shield-alt me-2"></i> Sistema seguro con encriptación de datos</p>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function abrirContacto() {
+    const email = 'jsuarez@elmarques.gob.mx';
+    
+    Swal.fire({
+        title: 'Soporte Técnico',
+        icon: 'info',
+        html: `
+            <p>Para recuperar su acceso o reportar un fallo, escriba a:</p>
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 10px; border: 1px dashed #0508df; margin: 15px 0;">
+                <strong style="font-size: 1.1rem; color: #0508df;">${email}</strong>
+            </div>
+            <button onclick="copiarEmail('${email}')" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-copy"></i> Copiar correo
+            </button>
+        `,
+        showConfirmButton: true,
+        confirmButtonText: 'Cerrar',
+        confirmButtonColor: '#1e293b'
+    });
+}
+
+function copiarEmail(email) {
+    navigator.clipboard.writeText(email).then(() => {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Correo copiado al portapapeles',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    });
+}
+</script>
+
 {% endblock %}

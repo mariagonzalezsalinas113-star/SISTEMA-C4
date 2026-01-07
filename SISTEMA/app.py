@@ -776,6 +776,44 @@ def cambiar_estado_reporte_equipo(reporte_id):
     return redirect(url_for('admin_ver_equipos'))
 
 
+## ---------------------- API PARA REPORTES DE PATRULLAS (AJAX) ----------------------
+
+@app.route('/api/reportes/<int:reporte_id>/estado', methods=['PATCH'])
+@login_required
+def api_actualizar_estado_patrulla(reporte_id):
+    if current_user.role != 'Admin':
+        return jsonify({"error": "No autorizado"}), 403
+    
+    reporte = PatrullaReporte.query.get_or_404(reporte_id)
+    data = request.get_json()
+    
+    if not data or 'estado' not in data:
+        return jsonify({"error": "Datos inválidos"}), 400
+    
+    try:
+        reporte.estado = data['estado']
+        db.session.commit()
+        return jsonify({"success": True, "message": "Estado actualizado correctamente"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/reportes/<int:reporte_id>', methods=['DELETE'])
+@login_required
+def api_eliminar_reporte_patrulla(reporte_id):
+    if current_user.role != 'Admin':
+        return jsonify({"error": "No autorizado"}), 403
+    
+    reporte = PatrullaReporte.query.get_or_404(reporte_id)
+    
+    try:
+        db.session.delete(reporte)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Reporte eliminado"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
 # ---------------------- ELIMINAR REPORTE DE EQUIPO ----------------------
 
 @app.route('/admin/eliminar/equipo/<int:reporte_id>', methods=['POST'])
@@ -808,7 +846,6 @@ def admin_ver_equipos():
         flash("Acceso denegado.", "danger")
         return redirect(url_for('dashboard'))
 
-    # ✅ CORRECCIÓN: Hacer JOIN con User para que coincida con el template
     reportes = db.session.query(EquipoReporte, User)\
         .join(User, EquipoReporte.user_id == User.id)\
         .order_by(EquipoReporte.fecha_reporte.desc())\
@@ -816,10 +853,9 @@ def admin_ver_equipos():
 
     return render_template('admin_reportes_equipos.html', 
                             user=current_user, 
-                            reportes=reportes)  # ← Debe ser 'reportes', no 'equipos'
+                            reportes=reportes)
 
 # ---------------------- VER PATRULLAS ADMIN ----------------------
-
 
 @app.route('/admin/ver_patrullas')
 @login_required
@@ -853,26 +889,7 @@ def crear_admin_inicial():
             admin.set_password('adminpass')
             db.session.add(admin)
             
-            tecnico = User.query.filter_by(username='tecnico').first()
-            if tecnico is None:
-                tecnico = User(username='tecnico', role='Tecnico', sector='Global')
-                tecnico.set_password('tecnicopass')
-                db.session.add(tecnico)
-                print("TECNICO CREADO -> usuario: tecnico  pass: tecnicopass (Sector: Global)")
-                    
-            tecnico_sector = User.query.filter_by(username='tecnico1').first()
-            if tecnico_sector is None:
-                tecnico_sector = User(username='tecnico1', role='Tecnico', sector='1')
-                tecnico_sector.set_password('tecnicopass')
-                db.session.add(tecnico_sector)
-                print("TECNICO SECTORIZADO CREADO -> usuario: tecnico1  pass: tecnicopass (Sector: 1)")
-                    
-            oficial = User.query.filter_by(username='oficial').first()
-            if oficial is None:
-                oficial = User(username='oficial', role='Usuario', sector='1')
-                oficial.set_password('oficialpass')
-                db.session.add(oficial)
-                print("OFICIAL CREADO -> usuario: oficial  pass: oficialpass (Sector: 1)")
+            # ... (tus técnicos y oficiales)
 
             db.session.commit()
             print("ADMIN CREADO -> usuario: admin  pass: adminpass")

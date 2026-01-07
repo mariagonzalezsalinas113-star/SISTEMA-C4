@@ -9,7 +9,6 @@
 <body class="bg-gray-100">
     <div class="min-h-screen py-8 px-4">
         <div class="max-w-3xl mx-auto">
-            <!-- Header -->
             <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
                 <div class="flex justify-between items-center">
                     <div>
@@ -23,7 +22,6 @@
                 </div>
             </div>
 
-            <!-- Mensajes Flash -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -34,11 +32,9 @@
                 {% endif %}
             {% endwith %}
 
-            <!-- Formulario Principal -->
             <div class="bg-white rounded-lg shadow-xl p-6">
                 <form method="POST" enctype="multipart/form-data" id="reporteForm">
                     
-                    <!-- Tipo de Equipo -->
                     <div class="mb-6">
                         <label for="tipo" class="block text-sm font-bold text-gray-700 mb-2">
                             Tipo de Equipo <span class="text-red-500">*</span>
@@ -60,7 +56,6 @@
                         </select>
                     </div>
 
-                    <!-- Número de Serie/Inventario -->
                     <div class="mb-6">
                         <label for="serie" class="block text-sm font-bold text-gray-700 mb-2">
                             Número de Serie o Inventario <span class="text-red-500">*</span>
@@ -73,24 +68,14 @@
                         </p>
                     </div>
 
-                    <!-- Estado del Equipo -->
                     <div class="mb-6">
                         <label class="block text-sm font-bold text-gray-700 mb-3">
                             Estado del Equipo <span class="text-red-500">*</span>
                         </label>
                         <div class="space-y-3">
-                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300 transition">
-                                <input type="radio" name="estado" value="operativo" required
-                                       class="w-5 h-5 text-green-600" onchange="toggleComentarios()">
-                                <div class="ml-3">
-                                    <div class="font-semibold text-gray-900">✅ Operativo</div>
-                                    <div class="text-sm text-gray-600">El equipo funciona correctamente</div>
-                                </div>
-                            </label>
-
                             <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-yellow-50 hover:border-yellow-300 transition">
                                 <input type="radio" name="estado" value="falla_menor" required
-                                       class="w-5 h-5 text-yellow-600" onchange="toggleComentarios()">
+                                       class="w-5 h-5 text-yellow-600">
                                 <div class="ml-3">
                                     <div class="font-semibold text-gray-900">⚠️ Falla Menor</div>
                                     <div class="text-sm text-gray-600">Problemas que no impiden su uso básico</div>
@@ -99,7 +84,7 @@
 
                             <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-red-50 hover:border-red-300 transition">
                                 <input type="radio" name="estado" value="falla_grave" required
-                                       class="w-5 h-5 text-red-600" onchange="toggleComentarios()">
+                                       class="w-5 h-5 text-red-600">
                                 <div class="ml-3">
                                     <div class="font-semibold text-gray-900">🔴 Falla Grave</div>
                                     <div class="text-sm text-gray-600">El equipo no puede utilizarse</div>
@@ -108,7 +93,7 @@
 
                             <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition">
                                 <input type="radio" name="estado" value="mantenimiento" required
-                                       class="w-5 h-5 text-blue-600" onchange="toggleComentarios()">
+                                       class="w-5 h-5 text-blue-600">
                                 <div class="ml-3">
                                     <div class="font-semibold text-gray-900">🔧 Requiere Mantenimiento</div>
                                     <div class="text-sm text-gray-600">Limpieza, actualización o revisión preventiva</div>
@@ -117,41 +102,15 @@
                         </div>
                     </div>
 
-                    <!-- Descripción del Problema -->
-                    <div class="mb-6" id="comentariosSection" style="display: none;">
+                    <div class="mb-6" id="comentariosSection">
                         <label for="comentarios" class="block text-sm font-bold text-gray-700 mb-2">
                             Descripción del Problema <span class="text-red-500">*</span>
                         </label>
-                        <textarea name="comentarios" id="comentarios" rows="5"
-                                  placeholder="Describa detalladamente el problema o solicitud:
-- ¿Qué sucede exactamente?
-- ¿Cuándo comenzó el problema?
-- ¿Hay mensajes de error?
-- ¿El problema es constante o intermitente?"
+                        <textarea name="comentarios" id="comentarios" rows="5" required
+                                  placeholder="Describa detalladamente el problema: ¿Qué sucede? ¿Cuándo comenzó?"
                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
-                        <p class="text-xs text-gray-500 mt-1">
-                            💡 Entre más detalles proporcione, más rápido podremos ayudarle
-                        </p>
                     </div>
 
-                    <!-- Información Adicional -->
-                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-blue-700">
-                                    <strong>Nota:</strong> Si el equipo está operativo, no se generará un ticket. 
-                                    Solo se registrarán los reportes que requieran atención técnica.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Información del Usuario (Automática) -->
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
                         <h3 class="font-semibold text-gray-700 mb-2">📋 Información del Reporte</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
@@ -163,18 +122,13 @@
                                 <span class="text-gray-600">Sector:</span>
                                 <span class="font-medium text-gray-900">{{ current_user.sector or 'Sin Sector' }}</span>
                             </div>
-                            <div>
-                                <span class="text-gray-600">Fecha:</span>
-                                <span class="font-medium text-gray-900">{{ now().strftime('%d/%m/%Y') }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-600">Hora:</span>
-                                <span class="font-medium text-gray-900">{{ now().strftime('%H:%M') }}</span>
+                            <div class="col-span-2">
+                                <span class="text-gray-600">Fecha y Hora Local:</span>
+                                <span id="fecha-local" class="font-medium text-gray-900">Calculando...</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Botones de Acción -->
                     <div class="flex gap-3">
                         <button type="submit" 
                                 class="flex-1 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
@@ -187,54 +141,43 @@
                     </div>
                 </form>
             </div>
-
-            <!-- Ayuda Rápida -->
-            <div class="mt-6 bg-white rounded-lg shadow-lg p-4">
-                <h3 class="font-bold text-gray-800 mb-2">❓ ¿Necesitas Ayuda?</h3>
-                <ul class="text-sm text-gray-600 space-y-1">
-                    <li>• Si no encuentras el número de inventario, contacta a tu supervisor</li>
-                    <li>• Para fallas graves, considera reportar también por teléfono</li>
-                    <li>• Puedes revisar el estado de tus reportes en "Mis Reportes"</li>
-                </ul>
-            </div>
         </div>
     </div>
 
     <script>
-        function toggleComentarios() {
-            const estadoSeleccionado = document.querySelector('input[name="estado"]:checked').value;
-            const comentariosSection = document.getElementById('comentariosSection');
-            const comentariosTextarea = document.getElementById('comentarios');
-
-            if (estadoSeleccionado === 'operativo') {
-                comentariosSection.style.display = 'none';
-                comentariosTextarea.removeAttribute('required');
-            } else {
-                comentariosSection.style.display = 'block';
-                comentariosTextarea.setAttribute('required', 'required');
-            }
+        // Función para obtener la hora local del navegador del usuario
+        function mostrarFechaLocal() {
+            const ahora = new Date();
+            const opciones = { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('fecha-local').innerText = ahora.toLocaleString('es-ES', opciones);
         }
 
-        // Validación del formulario
+        // Ejecutar al cargar la página
+        mostrarFechaLocal();
+
+        // Validación simple al enviar
         document.getElementById('reporteForm').addEventListener('submit', function(e) {
-            const estadoSeleccionado = document.querySelector('input[name="estado"]:checked');
-            
-            if (!estadoSeleccionado) {
+            const estado = document.querySelector('input[name="estado"]:checked');
+            const comentarios = document.getElementById('comentarios').value.trim();
+
+            if (!estado) {
                 e.preventDefault();
                 alert('Por favor, seleccione el estado del equipo');
                 return false;
             }
 
-            const estado = estadoSeleccionado.value;
-            const comentarios = document.getElementById('comentarios').value.trim();
-
-            if (estado !== 'operativo' && !comentarios) {
+            if (!comentarios) {
                 e.preventDefault();
-                alert('Por favor, describa el problema o solicitud');
+                alert('Por favor, describa el problema');
                 return false;
             }
-
-            return true;
         });
     </script>
 </body>
