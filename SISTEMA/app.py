@@ -892,13 +892,13 @@ def crear_admin_inicial():
 
 # ---------------------- RUN ----------------------
 if __name__ == '__main__':
-    # Paso 1: Crear las tablas en la base de datos de Railway si no existen
+    # 1. Creamos las tablas automáticamente en la base de datos de Railway
     with app.app_context():
         db.create_all()
     
-    # Paso 2: Usar el puerto que Railway asigna dinámicamente
+    # 2. Configuramos el puerto dinámico que exige Railway
     import os
     port = int(os.environ.get("PORT", 5000))
     
-    # Paso 3: Arrancar la app en 0.0.0.0 y el puerto dinámico
+    # 3. Arrancamos la aplicación
     app.run(host='0.0.0.0', port=port)
