@@ -34,19 +34,19 @@
         
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-red-700 mb-2">🚨 Reportes de Inspección de Patrullas</h1>
-                <p class="text-gray-600 text-sm md:text-base">Visualización y gestión de reportes de cámaras y patrullas</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-red-700 mb-2">🚨 Panel de Control: Patrullas</h1>
+                <p class="text-gray-600 text-sm md:text-base">Monitoreo de estado técnico de unidades y cámaras</p>
             </div>
             <a href="{{ url_for('admin_dashboard') }}" class="mt-3 md:mt-0 text-indigo-600 hover:text-indigo-800 font-medium flex items-center transition">
                 ← Volver al Dashboard
-            </a>
+            </a>     
         </div>
 
         {% if reportes_patrulla %}
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <div class="text-blue-600 text-sm font-medium">Total Reportes</div>
+                <div class="text-blue-600 text-sm font-medium">Total Inspecciones</div>
                 <div class="text-2xl font-bold text-blue-900">{{ reportes_patrulla|length }}</div>
             </div>
             <div class="bg-red-50 p-4 rounded-lg border border-red-200">
@@ -56,7 +56,7 @@
                 </div>
             </div>
             <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                <div class="text-yellow-600 text-sm font-medium">En Proceso</div>
+                <div class="text-yellow-600 text-sm font-medium">En Reparación</div>
                 <div class="text-2xl font-bold text-yellow-900">
                     {{ reportes_patrulla|selectattr('0.estado', 'equalto', 'En Proceso')|list|length }}
                 </div>
@@ -73,7 +73,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-                    <input type="text" id="searchInput" placeholder="Unidad, oficial..." 
+                    <input type="text" id="searchInput" placeholder="Unidad, oficial o turno..." 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 outline-none">
                 </div>
                 <div>
@@ -106,13 +106,13 @@
             <table class="min-w-full divide-y divide-gray-200" id="mainTable">
                 <thead class="bg-red-600 text-white">    
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase cursor-pointer hover:bg-red-700 transition" onclick="ordenarPor('id')">ID ↕</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase cursor-pointer hover:bg-red-700 transition" onclick="ordenarPor('unidad')">Unidad ↕</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">Oficial</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase cursor-pointer hover:bg-red-700 transition" onclick="ordenarPor('fecha')">Fecha ↕</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">Descripción</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">ID</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">Unidad</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">Personal</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">Turno</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-center">Fallas Detectadas</th>
                         <th class="px-4 py-3 text-left text-xs font-medium uppercase">Estado</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase">Acciones</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
@@ -123,44 +123,58 @@
                         data-oficial="{{ reporte[0].oficial_nombre }}"
                         data-fecha="{{ reporte[0].fecha_reporte.strftime('%Y-%m-%d') }}"
                         data-estado="{{ reporte[0].estado }}">
-                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">#{{ reporte[0].id }}</td>
+                        
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-bold">#{{ reporte[0].id }}</td>
                         <td class="px-4 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-black">
                                 {{ reporte[0].unidad_numero }}
                             </span>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            <div class="font-medium">{{ reporte[0].oficial_nombre }}</div>
-                            <div class="text-gray-500 text-xs">@{{ reporte[1].username }}</div>
+                            <div class="font-bold text-gray-900">{{ reporte[0].oficial_nombre }}</div>
+                            <div class="text-gray-500 text-xs">Técnico: @{{ reporte[1].username }}</div>
                         </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ reporte[0].fecha_reporte.strftime('%d/%m/%Y') }}
+                        <td class="px-4 py-4 whitespace-nowrap text-sm capitalize">
+                            {{ reporte[0].turno }}
                         </td>
+                        
                         <td class="px-4 py-4 text-sm max-w-xs">
-                            {% if reporte[0].falla_descripcion %}
-                                <div class="truncate-text text-gray-700" id="desc-{{ reporte[0].id }}">
-                                    {{ reporte[0].falla_descripcion }}
-                                </div>
-                                <button onclick="toggleDescripcion('{{ reporte[0].id }}')" class="text-red-600 text-xs font-medium mt-1 hover:underline">Ver más ↓</button>
-                            {% else %}
-                                <span class="text-gray-400 italic">Sin descripción</span>
+                            <div class="truncate-text" id="desc-{{ reporte[0].id }}">
+                                {% set fallas = [] %}
+                                {% if not reporte[0].camara1_funciona %}{% set _ = fallas.append("Cámara 1") %}{% endif %}
+                                {% if not reporte[0].camara2_funciona %}{% set _ = fallas.append("Cámara 2") %}{% endif %}
+                                {% if not reporte[0].camara3_funciona %}{% set _ = fallas.append("Cámara 3") %}{% endif %}
+                                {% if not reporte[0].camara4_funciona %}{% set _ = fallas.append("Cámara 4") %}{% endif %}
+                                {% if not reporte[0].grabadora1_funciona %}{% set _ = fallas.append("DVR 1") %}{% endif %}
+                                {% if not reporte[0].grabadora2_funciona %}{% set _ = fallas.append("DVR 2") %}{% endif %}
+
+                                {% if fallas %}
+                                    <div class="text-red-600 font-bold mb-1">⚠️ {{ fallas|join(', ') }}</div>
+                                    <div class="text-gray-500 text-xs italic">{{ reporte[0].observaciones or 'Sin notas adicionales' }}</div>
+                                {% else %}
+                                    <div class="text-green-600 font-bold">✅ Sistema Operativo</div>
+                                {% endif %}
+                            </div>
+                            {% if fallas or reporte[0].observaciones %}
+                            <button onclick="toggleDescripcion('{{ reporte[0].id }}')" class="text-blue-600 text-xs font-bold mt-1">Ver más ↓</button>
                             {% endif %}
                         </td>
+
                         <td class="px-4 py-4">
                             <select onchange="cambiarEstado('{{ reporte[0].id }}', this.value)"
-                                    class="px-2 py-1 text-xs font-semibold rounded-full border border-gray-300 outline-none transition-colors
+                                    class="px-2 py-1 text-xs font-bold rounded-full border border-gray-300
                                     {% if reporte[0].estado == 'En Proceso' %} bg-yellow-100 text-yellow-800
                                     {% elif reporte[0].estado == 'Cerrado' %} bg-green-100 text-green-800
                                     {% else %} bg-red-100 text-red-800 {% endif %}">
-                                <option value="Pendiente" {% if reporte[0].estado == 'Pendiente' %}selected{% endif %}>⏳ Pendiente</option>
-                                <option value="En Proceso" {% if reporte[0].estado == 'En Proceso' %}selected{% endif %}>🔧 En Proceso</option>
-                                <option value="Cerrado" {% if reporte[0].estado == 'Cerrado' %}selected{% endif %}>✅ Cerrado</option>
+                                <option value="Pendiente" {% if reporte[0].estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                <option value="En Proceso" {% if reporte[0].estado == 'En Proceso' %}selected{% endif %}>En Proceso</option>
+                                <option value="Cerrado" {% if reporte[0].estado == 'Cerrado' %}selected{% endif %}>Cerrado</option>
                             </select>
                         </td>
-                        <td class="px-4 py-4 text-sm">
-                            <div class="flex gap-3">
-                                <a href="{{ url_for('editar_reporte_patrulla', reporte_id=reporte[0].id) }}" class="text-indigo-600 hover:text-indigo-900 transition" title="Ver detalle">👁️</a>
-                                <button onclick="confirmarEliminar('{{ reporte[0].id }}')" class="text-gray-400 hover:text-red-600 transition" title="Eliminar">🗑️</button>
+                        <td class="px-4 py-4 text-center">
+                            <div class="flex justify-center gap-4">
+                                <a href="{{ url_for('editar_reporte_patrulla', reporte_id=reporte[0].id) }}" class="text-indigo-600 text-xl" title="Ver Detalle Técnico">👁️</a>
+                                <button onclick="confirmarEliminar('{{ reporte[0].id }}')" class="text-gray-400 text-xl hover:text-red-600" title="Eliminar">🗑️</button>
                             </div>
                         </td>
                     </tr>
@@ -172,41 +186,34 @@
         <div class="mobile-cards space-y-4" id="mobileCards">
             {% for reporte in reportes_patrulla %}
             <div class="border border-gray-200 rounded-lg p-4 bg-white shadow-sm report-item"
-                 data-id="{{ reporte[0].id }}"
                  data-unidad="{{ reporte[0].unidad_numero }}"
                  data-oficial="{{ reporte[0].oficial_nombre }}"
                  data-fecha="{{ reporte[0].fecha_reporte.strftime('%Y-%m-%d') }}"
                  data-estado="{{ reporte[0].estado }}">
                 <div class="flex justify-between mb-2">
-                    <span class="font-bold text-red-700">Unidad {{ reporte[0].unidad_numero }}</span>
-                    <span class="text-xs font-bold px-2 py-1 rounded bg-gray-100">{{ reporte[0].estado }}</span>
+                    <span class="font-black text-red-700">Unidad {{ reporte[0].unidad_numero }}</span>
+                    <span class="text-xs font-bold px-2 py-1 rounded {% if reporte[0].estado == 'Cerrado' %}bg-green-100{% else %}bg-red-100{% endif %}">
+                        {{ reporte[0].estado }}
+                    </span>
                 </div>
-                <p class="text-sm">Oficial: {{ reporte[0].oficial_nombre }}</p>
-                <p class="text-xs text-gray-500 mb-3">{{ reporte[0].fecha_reporte.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p class="text-sm font-bold">Oficial: {{ reporte[0].oficial_nombre }}</p>
+                <p class="text-xs text-gray-500 mb-3">Fecha: {{ reporte[0].fecha_reporte.strftime('%d/%m/%Y') }}</p>
                 <div class="flex gap-2">
-                    <a href="{{ url_for('editar_reporte_patrulla', reporte_id=reporte[0].id) }}" class="flex-1 text-center py-2 bg-red-600 text-white rounded text-sm font-medium">Ver Detalle</a>
-                    <button onclick="confirmarEliminar('{{ reporte[0].id }}')" class="p-2 border rounded hover:bg-red-50 text-gray-500">🗑️</button>
+                    <a href="{{ url_for('editar_reporte_patrulla', reporte_id=reporte[0].id) }}" class="flex-1 text-center py-2 bg-red-600 text-white rounded text-sm font-bold">VER DETALLE</a>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        <div class="mt-6 flex justify-between items-center border-t pt-4">
-            <div class="text-sm text-gray-600">
-                Mostrando <span id="resultadosCount" class="font-bold text-red-700">{{ reportes_patrulla|length }}</span> reportes
-            </div>
-        </div>
-
         {% else %}
         <div class="text-center py-12">
-            <div class="text-5xl mb-4">empty</div>
-            <p class="text-gray-500 text-lg">No hay reportes registrados en la base de datos.</p>
+            <div class="text-6xl mb-4">📋</div>
+            <p class="text-gray-500 text-lg font-bold">No se encontraron reportes de patrullas.</p>
         </div>
         {% endif %}
     </div>
 
     <script>
-        // Expandir/Contraer descripción
         function toggleDescripcion(id) {
             const elemento = document.getElementById(`desc-${id}`);
             const boton = elemento.nextElementSibling;
@@ -214,68 +221,44 @@
             boton.textContent = elemento.classList.contains('expanded') ? 'Ver menos ↑' : 'Ver más ↓';
         }
 
-        // Cambiar estado vía API (Fetch PATCH)
         function cambiarEstado(id, nuevoEstado) {
-            const selectElement = event.target;
-            if (confirm(`¿Cambiar reporte #${id} a estado: ${nuevoEstado}?`)) {
+            if (confirm(`¿Cambiar reporte #${id} a: ${nuevoEstado}?`)) {
                 fetch(`/api/reportes/${id}/estado`, {
                     method: 'PATCH',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({estado: nuevoEstado})
                 })
-                .then(res => {
-                    if (res.ok) {
-                        // Actualizar colores del select dinámicamente
-                        selectElement.className = `px-2 py-1 text-xs font-semibold rounded-full border border-gray-300 outline-none transition-colors ${
-                            nuevoEstado === 'En Proceso' ? 'bg-yellow-100 text-yellow-800' : 
-                            nuevoEstado === 'Cerrado' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`;
-                    } else {
-                        alert('Error al actualizar el estado en el servidor.');
-                        location.reload();
-                    }
-                });
-            } else {
-                location.reload(); // Revertir si el usuario cancela
-            }
+                .then(res => res.ok ? location.reload() : alert('Error al actualizar.'));
+            } else { location.reload(); }
         }
 
-        // Eliminar reporte (Fetch DELETE)
         function confirmarEliminar(id) {
-            if (confirm(`¿Estás seguro de eliminar permanentemente el reporte #${id}?`)) {
+            if (confirm(`¿Eliminar reporte #${id} permanentemente?`)) {
                 fetch(`/api/reportes/${id}`, { method: 'DELETE' })
-                .then(res => res.ok ? location.reload() : alert('Error al eliminar el registro.'));
+                .then(res => res.ok ? location.reload() : alert('Error al eliminar.'));
             }
         }
 
-        // Filtrado en tiempo real
         function aplicarFiltros() {
             const busqueda = document.getElementById('searchInput').value.toLowerCase();
             const estado = document.getElementById('filterEstado').value;
             const desde = document.getElementById('filterFechaDesde').value;
             const hasta = document.getElementById('filterFechaHasta').value;
-
             const items = document.querySelectorAll('.report-item');
             
             items.forEach(item => {
-                const txtUnidad = item.dataset.unidad.toLowerCase();
-                const txtOficial = item.dataset.oficial.toLowerCase();
-                const txtEstado = item.dataset.estado;
-                const txtFecha = item.dataset.fecha;
-
+                const unidad = item.dataset.unidad.toLowerCase();
+                const oficial = item.dataset.oficial.toLowerCase();
+                const est = item.dataset.estado;
+                const fecha = item.dataset.fecha;
                 let show = true;
 
-                if (busqueda && !txtUnidad.includes(busqueda) && !txtOficial.includes(busqueda)) show = false;
-                if (estado && txtEstado !== estado) show = false;
-                if (desde && txtFecha < desde) show = false;
-                if (hasta && txtFecha > hasta) show = false;
-
+                if (busqueda && !unidad.includes(busqueda) && !oficial.includes(busqueda)) show = false;
+                if (estado && est !== estado) show = false;
+                if (desde && fecha < desde) show = false;
+                if (hasta && fecha > hasta) show = false;
                 item.style.display = show ? '' : 'none';
             });
-
-            // Actualizar contador basado solo en la tabla desktop para evitar duplicar por cards móviles
-            const totalVisibles = document.querySelectorAll('.desktop-table .report-item:not([style*="display: none"])').length;
-            document.getElementById('resultadosCount').textContent = totalVisibles;
         }
 
         function limpiarFiltros() {
@@ -286,25 +269,6 @@
             aplicarFiltros();
         }
 
-        // Ordenamiento de tabla
-        let sortDir = { col: null, asc: true };
-        function ordenarPor(col) {
-            const tbody = document.getElementById('tableBody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            
-            sortDir.asc = sortDir.col === col ? !sortDir.asc : true;
-            sortDir.col = col;
-
-            rows.sort((a, b) => {
-                let v1 = a.dataset[col], v2 = b.dataset[col];
-                if (col === 'id' || col === 'unidad') { v1 = parseInt(v1); v2 = parseInt(v2); }
-                return sortDir.asc ? (v1 > v2 ? 1 : -1) : (v1 < v2 ? 1 : -1);
-            });
-
-            rows.forEach(r => tbody.appendChild(r));
-        }
-
-        // Exportar a CSV
         function exportarCSV() {
             let csv = 'ID,Unidad,Oficial,Fecha,Estado\n';
             document.querySelectorAll('.desktop-table .report-item').forEach(row => {
@@ -316,7 +280,7 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `reporte_patrullas_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `reporte_tecnico_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
         }
     </script>

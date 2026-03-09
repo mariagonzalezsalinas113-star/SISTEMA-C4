@@ -1,0 +1,14 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Open admin_editar_usuario.html",
+            "file": "c:\\Users\\c4\\Documents\\GitHub\\SISTEMA-C4\\SISTEMA\\templates\\admin_editar_usuario.html"
+        }
+    ]
+}

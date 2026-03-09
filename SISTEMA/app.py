@@ -78,10 +78,16 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-
 class EquipoReporte(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # --- NUEVOS CAMPOS ---
+    responsable_nombre = db.Column(db.String(100), nullable=False)
+    responsable_sector = db.Column(db.String(100), nullable=False)
+    telefono_responsable = db.Column(db.String(20), nullable=False)
+    # ---------------------
+
     sector = db.Column(db.String(50), nullable=False)
     inventario_numero = db.Column(db.String(50), nullable=False)
     falla_descripcion = db.Column(db.Text, nullable=False)
@@ -92,7 +98,6 @@ class EquipoReporte(db.Model):
     foto_reparado_path = db.Column(db.String(255), nullable=True)
 
     user = db.relationship('User', backref=db.backref('equipo_reportes', lazy=True))
-
 
 class PatrullaReporte(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -395,81 +400,83 @@ def tecnico_dashboard():
 
 
 # ---------------------- REPORTE EQUIPO ----------------------
-
 @app.route('/reporte_equipo', methods=['GET', 'POST'])
 @login_required
 def reporte_equipo_form():
     if request.method == 'POST':
-        tipo = request.form.get('tipo', '').strip()
-        serie = request.form.get('serie', '').strip()
-        estado_form = request.form.get('estado', '').strip()
-        comentarios = request.form.get('comentarios', '').strip()
-        
-        if not tipo or not serie or not estado_form:
-            flash("Todos los campos marcados con (*) son obligatorios.", "danger")
-            return render_template('reporte_equipo_form.html') 
+        # 1. Capturar datos del formulario (deben coincidir con el 'name' del HTML)
+        resp_nom = request.form.get('responsable_nombre')
+        resp_sec = request.form.get('responsable_sector')
+        resp_tel = request.form.get('telefono_responsable')
+        tipo_equipo = request.form.get('tipo')
+        num_serie = request.form.get('serie')
+        est_operativo = request.form.get('estado_operativo') # Cambiado para coincidir con el nuevo HTML
+        comentarios = request.form.get('comentarios')
 
-        if estado_form in ['falla_menor', 'falla_grave', 'mantenimiento'] and not comentarios:
-            flash("Si el estado es una falla o mantenimiento, debes describir el problema.", "danger")
-            return render_template('reporte_equipo_form.html') 
-
-        if estado_form == 'operativo':
-            flash("Equipo registrado como operativo. No se generó ticket de soporte.", "info")
-            return redirect(url_for('oficial_dashboard'))
+        # 2. Validación básica de seguridad
+        if not all([resp_nom, resp_sec, resp_tel, tipo_equipo, num_serie, est_operativo, comentarios]):
+            flash("Error: Todos los campos marcados con (*) son obligatorios.", "danger")
+            return render_template('reporte_equipo_form.html')
 
         try:
+            # 3. Crear el objeto con los nombres exactos del Modelo
             nuevo_reporte = EquipoReporte(
                 user_id=current_user.id,
+                responsable_nombre=resp_nom,
+                responsable_sector=resp_sec,
+                telefono_responsable=resp_tel,
                 sector=current_user.sector or 'Sin Sector',
-                inventario_numero=serie,
-                falla_descripcion=f"[{tipo}]\n\n{comentarios}",
+                inventario_numero=num_serie,
+                falla_descripcion=f"[{tipo_equipo}] - Estado: {est_operativo}\n\n{comentarios}",
                 estado='Pendiente',
-                fecha_reporte=datetime.datetime.utcnow()
+                fecha_reporte=datetime.datetime.now(datetime.timezone.utc)
             )
-            
+
             db.session.add(nuevo_reporte)
             db.session.commit()
-
-            flash("✓ Reporte enviado correctamente. El equipo técnico lo revisará pronto.", "success")
+            
+            flash("✓ El reporte se ha guardado exitosamente.", "success")
             return redirect(url_for('oficial_dashboard'))
 
         except Exception as e:
             db.session.rollback()
-            flash("Error al guardar el reporte. Contacta al administrador.", "danger")
-            current_app.logger.error(f"Error al guardar reporte de equipo: {e}")
-            return render_template('reporte_equipo_form.html')
-
+            print(f"DEBUG ERROR: {e}") # Esto saldrá en tu terminal de VS Code
+            flash(f"Error al guardar en la base de datos: {str(e)}", "danger")
+    
     return render_template('reporte_equipo_form.html')
-
-
 # ---------------------- REPORTE PATRULLA ----------------------
+# ---------------------- REPORTE PATRULLA (SOLO TÉCNICOS) ----------------------
 
 @app.route('/reporte/patrulla', methods=['GET', 'POST'])
 @login_required
 def reporte_patrulla_form():
-    if current_user.role != 'Usuario':
-        flash('Acceso denegado.', 'danger')
+    # Bloqueo de seguridad: Solo Técnicos y Administradores
+    if current_user.role not in ['Tecnico', 'Admin']:
+        flash('Acceso denegado. Solo el personal técnico puede realizar inspecciones.', 'danger')
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
         try:
+            # Captura de datos básicos de la unidad
             unidad_numero = request.form.get('unidad_numero', '').strip()
             oficial_nombre = request.form.get('oficial_nombre', '').strip()
             placa = request.form.get('placa', '').strip()
             marca = request.form.get('marca', '').strip()
             modelo = request.form.get('modelo', '').strip()
             turno = request.form.get('turno', '').strip()
+            sector_unidad = request.form.get('sector', '').strip()
             fecha_reporte_str = request.form.get('fecha_reporte')
             
-            if not all([unidad_numero, oficial_nombre, placa, marca, modelo, turno, fecha_reporte_str]):
+            # Validación de campos obligatorios
+            if not all([unidad_numero, oficial_nombre, placa, marca, modelo, turno, sector_unidad]):
                 flash('Faltan campos obligatorios en la información de la unidad.', 'danger')
                 return render_template('reporte_patrulla_form.html', user=current_user)
 
+            # Conversión de fecha
             try:
                 fecha_reporte = datetime.datetime.fromisoformat(fecha_reporte_str) 
             except ValueError:
-                flash('Error en el formato de Fecha y Hora del Reporte.', 'danger')
-                return render_template('reporte_patrulla_form.html', user=current_user)
+                fecha_reporte = datetime.datetime.now()
 
             todas_ok = True
             falla_lista = []
@@ -477,8 +484,9 @@ def reporte_patrulla_form():
             componentes_detalle = {}
             primera_foto_global = None
 
+            # Procesamiento de Cámaras (1 a 4) y Grabadoras (1 a 4)
             for i in range(1, 5):
-                # CAMARAS
+                # Lógica para Cámaras
                 cam_funciona = request.form.get(f'camara_{i}') == '1'
                 componentes_status[f'camara{i}_funciona'] = cam_funciona
                 
@@ -486,16 +494,14 @@ def reporte_patrulla_form():
                     todas_ok = False
                     detalle = request.form.get(f'falla_camara_desc_{i}', '').strip()
                     foto = request.files.get(f'falla_camara_foto_{i}')
-                    
-                    falla_lista.append(f"[Cámara {i} - Falla]: {detalle}")
-                    
+                    falla_lista.append(f"[Cámara {i}]: {detalle}")
                     componentes_detalle[f'falla_camara_desc_{i}'] = detalle
-                    p = guardar_foto(foto)
-                    componentes_detalle[f'falla_camara_foto_{i}'] = p
-                    if p and primera_foto_global is None:
-                        primera_foto_global = p
+                    path_foto = guardar_foto(foto)
+                    componentes_detalle[f'falla_camara_foto_{i}'] = path_foto
+                    if path_foto and not primera_foto_global:
+                        primera_foto_global = path_foto
 
-                # GRABADORAS
+                # Lógica para Grabadoras
                 grab_funciona = request.form.get(f'grabadora_{i}') == '1'
                 componentes_status[f'grabadora{i}_funciona'] = grab_funciona
 
@@ -503,26 +509,26 @@ def reporte_patrulla_form():
                     todas_ok = False
                     detalle = request.form.get(f'falla_grabadora_desc_{i}', '').strip()
                     foto = request.files.get(f'falla_grabadora_foto_{i}')
-                    
-                    falla_lista.append(f"[Grabadora {i} - Falla]: {detalle}")
-                    
+                    falla_lista.append(f"[Grabadora {i}]: {detalle}")
                     componentes_detalle[f'falla_grabadora_desc_{i}'] = detalle
-                    p = guardar_foto(foto)
-                    componentes_detalle[f'falla_grabadora_foto_{i}'] = p
-                    if p and primera_foto_global is None:
-                        primera_foto_global = p
+                    path_foto = guardar_foto(foto)
+                    componentes_detalle[f'falla_grabadora_foto_{i}'] = path_foto
+                    if path_foto and not primera_foto_global:
+                        primera_foto_global = path_foto
             
             observaciones = request.form.get('observaciones', '').strip()
             if observaciones:
-                falla_lista.append(f"[Observaciones Adicionales]: {observaciones}")
+                falla_lista.append(f"[Obs. Técnico]: {observaciones}")
 
             falla_final = '\n'.join(falla_lista)
+            
+            # El estado depende de si el técnico encontró fallas o no
             estado = "Pendiente" if not todas_ok else "Cerrado" 
 
-            nuevo = PatrullaReporte(
-                user_id=current_user.id,
+            nuevo_reporte = PatrullaReporte(
+                user_id=current_user.id, # ID del TÉCNICO que llena el reporte
                 unidad_numero=unidad_numero,
-                sector=current_user.sector,
+                sector=sector_unidad,    # Sector de la patrulla revisada
                 oficial_nombre=oficial_nombre,
                 placa=placa,
                 marca=marca,        
@@ -532,37 +538,27 @@ def reporte_patrulla_form():
                 **componentes_status,
                 **componentes_detalle,
                 observaciones=observaciones,
-                falla_descripcion=falla_final,
+                falla_descripcion=falla_final if falla_final else "Inspección sin novedades",
                 estado=estado,
                 foto_falla_path=primera_foto_global
             )
             
             if estado == 'Cerrado':
-                nuevo.fecha_reparacion = datetime.datetime.utcnow()
+                nuevo_reporte.fecha_reparacion = datetime.datetime.now()
                 
-            db.session.add(nuevo)
+            db.session.add(nuevo_reporte)
             db.session.commit()
             
-            if estado == 'Cerrado':
-                flash("Reporte enviado. Patrulla registrada como operativa y reporte cerrado.", "success")
-            else:
-                flash("Reporte de falla enviado. El equipo técnico lo revisará.", "warning")
-                
-            return redirect(url_for('mis_reportes'))
-
-        except ValueError as ve:
-            flash(f'Error de datos: {ve}', 'danger')
-            current_app.logger.error(f"Error de valor en reporte de patrulla: {ve}")
-            return render_template('reporte_patrulla_form.html', user=current_user)
+            flash(f"Inspección de unidad {unidad_numero} guardada correctamente.", "success")
+            return redirect(url_for('tecnico_dashboard'))
 
         except Exception as e:
             db.session.rollback()
-            flash("Error al guardar reporte. Contacta al administrador.", "danger")
-            current_app.logger.error(f"Error fatal al guardar reporte de patrulla: {e}")
+            current_app.logger.error(f"Error en reporte técnico: {e}")
+            flash("Error al procesar la inspección.", "danger")
             return render_template('reporte_patrulla_form.html', user=current_user)
 
     return render_template('reporte_patrulla_form.html', user=current_user)
-
 
 # ---------------------- MIS REPORTES ----------------------
 
@@ -582,58 +578,58 @@ def mis_reportes():
 
 # ---------------------- EDITAR REPORTE DE EQUIPO (TEC/ADMIN) ----------------------
 
+# ---------------------- EDITAR REPORTE DE EQUIPO (TEC/ADMIN) ----------------------
+
+# ---------------------- EDITAR REPORTE DE EQUIPO (VERSION FINAL) ----------------------
+
 @app.route('/reporte/equipo/editar/<int:reporte_id>', methods=['GET', 'POST'])
 @login_required
 def editar_reporte_equipo(reporte_id):
+    # 1. Validación de Roles
     if current_user.role not in ['Admin', 'Tecnico']:
         flash("Acceso denegado.", "danger")
         return redirect(url_for('dashboard'))
 
     reporte = EquipoReporte.query.get_or_404(reporte_id)
 
-    if current_user.role == 'Tecnico' and current_user.sector != 'Global' and reporte.sector != current_user.sector:
-        flash("No pertenece a su sector.", "danger")
-        return redirect(url_for('tecnico_dashboard'))
-
+    # 2. Procesar Actualización (POST)
     if request.method == 'POST':
-        if current_user.role == 'Admin':
-            reporte.inventario_numero = request.form.get('inventario', reporte.inventario_numero).strip()
-            reporte.falla_descripcion = request.form.get('falla', reporte.falla_descripcion).strip()
-            reporte.sector = request.form.get('sector', reporte.sector).strip()
-
-        nuevo_estado = request.form.get('estado')
-        reporte.estado = nuevo_estado
-
-        foto_rep = request.files.get('foto_reparado')
-        if foto_rep and foto_rep.filename:
-            p = guardar_foto(foto_rep)
-            if p:
-                reporte.foto_reparado_path = p
-
-        if nuevo_estado in ['Reparado', 'Finalizado', 'Cerrado'] and reporte.fecha_reparacion is None:
-            reporte.fecha_reparacion = datetime.datetime.utcnow()
-        elif nuevo_estado in ['Pendiente', 'En Progreso']:
-            reporte.fecha_reparacion = None
-
         try:
-            db.session.commit()
-            flash("Reporte actualizado.", "success")
+            # Obtener el nuevo estado del formulario
+            nuevo_estado = request.form.get('estado')
+            if nuevo_estado:
+                reporte.estado = nuevo_estado
+                
+                # Gestión de fecha de reparación
+                if nuevo_estado in ['Reparado', 'Cerrado']:
+                    reporte.fecha_reparacion = datetime.datetime.utcnow()
+                else:
+                    reporte.fecha_reparacion = None
 
+            # Procesar foto de reparación
+            foto_rep = request.files.get('foto_reparado')
+            if foto_rep and foto_rep.filename != '':
+                path_foto = guardar_foto(foto_rep)
+                if path_foto:
+                    reporte.foto_reparado_path = path_foto
+
+            db.session.commit()
+            flash(f"✅ Reporte #{reporte_id} actualizado con éxito.", "success")
+            
+            # Redirigir según el rol
             if current_user.role == 'Admin':
-                return redirect(url_for('admin_ver_equipos'))
+                return redirect(url_for('admin_dashboard'))
             return redirect(url_for('tecnico_dashboard'))
 
         except Exception as e:
             db.session.rollback()
-            flash("Error al actualizar.", "danger")
-            current_app.logger.error(f"Error al editar equipo: {e}")
+            current_app.logger.error(f"Error al editar equipo ID {reporte_id}: {e}")
+            flash("❌ Error al guardar los cambios.", "danger")
+            return redirect(url_for('tecnico_dashboard'))
 
-    return render_template('editar_reporte_equipo.html',
-                           reporte=reporte,
-                           user=current_user,
-                           roles_edicion=['Pendiente', 'En Progreso', 'Reparado', 'Cerrado'])
-
-
+    # Si es GET, enviamos a la página de edición (si tienes una dedicada)
+    # o simplemente redirigimos al dashboard si lo haces por modales
+    return render_template('editar_reporte_equipo.html', reporte=reporte)
 # ---------------------- EDITAR REPORTE DE PATRULLA (TEC/ADMIN) ----------------------
 
 @app.route('/reporte/patrulla/editar/<int:reporte_id>', methods=['GET', 'POST'])
@@ -896,10 +892,6 @@ def crear_admin_inicial():
 
 
 # ---------------------- RUN ----------------------
-
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        crear_admin_inicial()
-
-    app.run(debug=True)
+    # Usamos 0.0.0.0 para que escuche en todos los segmentos de red
+    app.run(host='0.0.0.0', port=5000)

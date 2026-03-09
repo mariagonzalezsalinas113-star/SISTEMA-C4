@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard con Asistente</title>
+    <style>
+        /* Estilos del Dashboard */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #007af5;
+            display: flex;
+        }
+
+        /* Sidebar Simulado */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+        }
+
+        /* Contenido Principal */    
+        .main-content {
+            flex: 1;
+            padding: 40px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* --- ESTILOS DEL CHATBOT FLOTANTE --- */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        /* Botón Circular */
+        .chat-button {
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+            transition: transform 0.3s;
+        }
+        .chat-button:hover { transform: scale(1.1); }
+
+        /* Contenedor del Chat (Oculto por defecto) */
+        .chat-container {
+            width: 380px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            display: none; /* Se activa con JS */
+            flex-direction: column;
+            overflow: hidden;
+            margin-bottom: 15px;
+            animation: slideUp 0.4s ease;
+        }
+
+        .chat-container.active { display: flex; }
+
+        /* Copia de tus estilos originales ajustados */
+        .chat-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; background: #f8fafc; }
+        .message { display: flex; margin-bottom: 12px; animation: fadeIn 0.3s ease; }
+        .message.bot { justify-content: flex-start; }
+        .message.user { justify-content: flex-end; }
+        .message-bubble { max-width: 80%; padding: 10px 14px; border-radius: 15px; font-size: 13px; line-height: 1.4; }
+        .message.bot .message-bubble { background: white; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+        .message.user .message-bubble { background: #2563eb; color: white; border-bottom-right-radius: 4px; }
+        .chat-input { padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 8px; }
+        .chat-input input { flex: 1; padding: 10px; border: 1px solid #e2e8f0; border-radius: 20px; outline: none; }
+        .send-button { border: none; background: none; color: #2563eb; font-size: 20px; cursor: pointer; }
+        .typing-indicator { display: none; padding: 5px; font-size: 11px; color: #64748b; }
+        .typing-indicator.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Mi Dashboard</h2>
+        <p style="margin-top:20px; opacity:0.7">Inicio</p>
+        <p style="margin-top:10px; opacity:0.7">Mis Equipos</p>
+        <p style="margin-top:10px; opacity:0.7">Garantías</p>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <h1>Bienvenido de nuevo</h1>
+            <p>Aquí puedes ver el estado de tus reparaciones técnicas.</p>
+        </div>
+        <div class="card">
+            <h3>Estado del Sistema</h3>
+            <p>Todos los servicios están operando normalmente.</p>
+        </div>
+    </div>
+
+    <div class="chat-widget">
+        <div class="chat-container" id="chatWindow">
+            <div class="chat-header">
+                <div style="display:flex; align-items:center; gap:10px">
+                    <span style="font-size: 20px;">🛠️</span>
+                    <div>
+                        <p style="margin:0; font-size: 14px; font-weight:bold">Soporte Técnico</p>
+                        <p style="margin:0; font-size: 10px;"><span class="status-dot"></span>En línea</p>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:18px">✕</button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-bubble">
+                        ¡Hola! Soy tu asistente de reparaciones del Dashboard. 👋<br><br>
+                        ¿En qué puedo ayudarte hoy?
+                    </div>
+                </div>
+                <div class="typing-indicator" id="typingIndicator">El técnico está escribiendo...</div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="Escribe aquí..." onkeypress="handleKeyPress(event)">
+                <button class="send-button" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+
+        <div class="chat-button" onclick="toggleChat()">
+            💬
+        </div>
+    </div>
+
+    <script>
+        const chatWindow = document.getElementById('chatWindow');
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function toggleChat() {
+            chatWindow.classList.toggle('active');
+        }
+
+        // --- TU LÓGICA DE RESPUESTAS (Mantenida) ---
+        let esperaTelefono = false;
+        let equipoContexto = 'laptop';
+        const responses = {
+            'no enciende': {
+                'laptop': 'Si tu **Laptop** no enciende:\n1. Revisa el cargador.\n2. Pulsa encendido 30 seg.\n3. Puede ser el Pin de Carga.',
+                'celular': 'Si tu **Celular** no prende:\n1. Carga 1 hora.\n2. Prueba otro cable.\n3. Reinicio forzado.',
+                'consola': 'Si tu **Consola** no enciende:\n1. Cambia el cable AC.\n2. Revisa el puerto HDMI.'
+            },
+            'lento': 'Recomiendo instalar un **Disco Sólido (SSD)** para mejorar la velocidad.',
+            'mojado': '❌ **¡PELIGRO!** No lo enciendas. Necesita limpieza por ultrasonido urgente.',
+            'pantalla': 'Necesitamos el modelo exacto para darte presupuesto del repuesto.',
+            'se apaga': 'Parece **Sobrecalentamiento**. Necesita mantenimiento y pasta térmica nueva.'
+        };
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            messageDiv.appendChild(bubble);
+            chatMessages.insertBefore(messageDiv, typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getBotResponse(rawMessage) {
+            const msg = rawMessage.toLowerCase();
+            if (msg.includes('celular') || msg.includes('telefono')) equipoContexto = 'celular';
+            if (msg.includes('laptop') || msg.includes('pc')) equipoContexto = 'laptop';
+
+            if (msg.includes('no enciende') || msg.includes('prende')) return responses['no enciende'][equipoContexto];
+            if (msg.includes('lento')) return responses['lento'];
+            if (msg.includes('mojado') || msg.includes('agua')) return responses['mojado'];
+            if (msg.includes('pantalla')) return responses['pantalla'];
+            if (msg.includes('apaga')) return responses['se apaga'];
+
+            return null;
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+
+            addMessage(message, true);
+            userInput.value = '';
+            typingIndicator.classList.add('active');
+
+            setTimeout(() => {
+                typingIndicator.classList.remove('active');
+                if (esperaTelefono) {
+                    addMessage(`✅ **Recibido.** Llamaremos al **${message}** pronto. ¡Gracias!`);
+                    esperaTelefono = false;
+                } else {
+                    const botResponse = getBotResponse(message);
+                    if (botResponse) {
+                        addMessage(botResponse);
+                    } else {
+                        esperaTelefono = true;
+                        addMessage("No entiendo esa falla... 🤔 Déjanos tu **teléfono** y un técnico te llamará.");
+                    }
+                }
+            }, 1000);
+        }
+
+        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+    </script>
+</body>
+</html>

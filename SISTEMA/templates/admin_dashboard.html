@@ -3,74 +3,104 @@
 {% block title %}Panel de Administración{% endblock %}
 
 {% block content %}
-<header class="mb-5 border-bottom pb-3">
-    <h1 class="display-5 fw-bold text-primary">
-        <i class="fas fa-user-shield me-3"></i> Panel de Administración
-    </h1>
-    <p class="text-muted lead">Gestión centralizada de usuarios y supervisión de reportes del sistema.</p>
-</header>
-
-<div class="card bg-primary text-white shadow-lg mb-5 border-0">
-    <div class="card-body py-4">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-user-tag fa-2x me-4"></i>
-            <div>
-                <h4 class="card-title mb-1">¡Bienvenido, **{{ user.username }}**!</h4>
-                <p class="card-text mb-0">Rol: **{{ user.role }}** | Tienes permisos completos de **Administrador**.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<h2 class="h4 mb-4 text-secondary">Funcionalidades Principales</h2>
-
-<div class="row row-cols-1 row-cols-md-3 g-4">
-
-    <div class="col">
-        <div class="card h-100 shadow-sm border-0 hover-lift">
-            <div class="card-body text-center p-4">
-                <i class="fas fa-users display-5 text-dark mb-3"></i>
-                <h5 class="card-title fw-bold text-dark">Gestión de Usuarios</h5>
-                <p class="card-text text-muted">Crea, edita o elimina cuentas de usuarios, técnicos y otros administradores.</p>
-                <a href="{{ url_for('admin_usuarios') }}" class="btn btn-dark mt-3 w-100">
-                    <i class="fas fa-user-plus me-1"></i> Gestionar Usuarios
-                </a>
-            </div>
-        </div>
-    </div>
+<style>
+    /* Mejora la experiencia en móviles */
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgb(0, 17, 255)!important;
+    }
     
-    <div class="col">
-        <div class="card h-100 shadow-sm border-0 hover-lift">
-            <div class="card-body text-center p-4">
-                <i class="fas fa-headset display-5 text-info mb-3"></i>
-                <h5 class="card-title fw-bold text-info">Reportes de Equipos</h5>
-                <p class="card-text text-muted">Visualiza todos los reportes de equipos (Radios, GPS, etc.) levantados por los usuarios.</p>
-                <a href="{{ url_for('admin_ver_equipos') }}" class="btn btn-info text-white mt-3 w-100">
-                    <i class="fas fa-clipboard-list me-1"></i> Ver Reportes
-                </a>
+    /* Ajuste para que los títulos no se corten en pantallas muy pequeñas */
+    @media (max-width: 576px) {
+        .display-5 {
+            font-size: 1.8rem;
+        }
+        .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
+
+<div class="container-fluid px-4 py-3">
+    <header class="mb-4 border-bottom pb-3 text-center text-md-start">
+        <h1 class="display-5 fw-bold text-primary">
+            <i class="fas fa-user-shield me-2"></i> Panel de Administración
+        </h1>
+        <p class="text-muted lead">Gestión centralizada de usuarios y supervisión de reportes.</p>
+    </header>
+
+    <div class="card bg-primary text-white shadow-lg mb-5 border-0">
+        <div class="card-body py-4">
+            <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+                <div class="mb-3 mb-md-0 me-md-4">
+                    <i class="fas fa-user-tag fa-3x"></i>
+                </div>
+                <div>
+                    <h4 class="card-title mb-1">¡Bienvenido, <strong>{{ user.username }}</strong>!</h4>
+                    <p class="card-text mb-0 opacity-75">Rol: <strong>{{ user.role }}</strong> | Permisos de Administrador Activos</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col">
-        <div class="card h-100 shadow-sm border-0 hover-lift">
-            <div class="card-body text-center p-4">
-                <i class="fas fa-car display-5 text-danger mb-3"></i>
-                <h5 class="card-title fw-bold text-danger">Reportes de Patrullas</h5>
-                <p class="card-text text-muted">Revisa el estado de las cámaras y fallas mecánicas/técnicas reportadas en las patrullas.</p>
-                <a href="{{ url_for('admin_ver_patrullas') }}" class="btn btn-danger mt-3 w-100">
-                    <i class="fas fa-camera me-1"></i> Ver Reportes
-                </a>
+    <h2 class="h4 mb-4 text-secondary text-center text-md-start">Funcionalidades Principales</h2>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 hover-lift">
+                <div class="card-body text-center d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-users fa-3x text-dark"></i>
+                    </div>
+                    <h5 class="card-title fw-bold text-dark">Gestión de Usuarios</h5>
+                    <p class="card-text text-muted flex-grow-1">Crea, edita o elimina cuentas de usuarios y técnicos.</p>
+                    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-dark mt-3 w-100 py-2">
+                        <i class="fas fa-user-plus me-1"></i> Gestionar
+                    </a>
+                </div>
             </div>
         </div>
+        
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 hover-lift">
+                <div class="card-body text-center d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-headset fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title fw-bold text-info">Reportes de Equipos</h5>
+                    <p class="card-text text-muted flex-grow-1">Radios, GPS y otros dispositivos electrónicos.</p>
+                    <a href="{{ url_for('admin_ver_equipos') }}" class="btn btn-info text-white mt-3 w-100 py-2">
+                        <i class="fas fa-clipboard-list me-1"></i> Ver Reportes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0 hover-lift">
+                <div class="card-body text-center d-flex flex-column">
+                    <div class="mb-3">
+                        <i class="fas fa-car fa-3x text-danger"></i>
+                    </div>
+                    <h5 class="card-title fw-bold text-danger">Reportes de Patrullas</h5>
+                    <p class="card-text text-muted flex-grow-1">Estado de cámaras y fallas mecánicas de unidades.</p>
+                    <a href="{{ url_for('admin_ver_patrullas') }}" class="btn btn-danger mt-3 w-100 py-2">
+                        <i class="fas fa-camera me-1"></i> Ver Reportes
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <footer class="text-center mt-5 pt-4 border-top">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary px-5">
+            <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+        </a>
+    </footer>
 </div>
-
-<footer class="text-center mt-5 pt-4 border-top">
-    <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-lg">
-        <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
-    </a>
-</footer>
 {% endblock %}
-

@@ -8,10 +8,14 @@
         --primary-dark: #2c3e50;
         --accent-blue: #3498db;
         --border-color: #e9ecef;
+        --bg-light: #f8f9fa;
+        --bot-bubble: #eef2f7;
+        --user-bubble: #3498db;
     }
 
+    /* === ESTILOS DEL DASHBOARD === */
     .dashboard-wrapper {
-        background-color: #f8f9fa;
+        background-color: var(--bg-light);
         border-radius: 20px;
         padding: 30px;
         margin-top: 20px;
@@ -25,7 +29,7 @@
     }
 
     .stat-card {
-        background: rgba(255, 255, 255, 0.322);
+        background: rgba(255, 255, 255, 0.8);
         border: 1px solid var(--border-color);
         border-radius: 12px;
         transition: all 0.3s cubic-bezier(.25,.8,.25,1);
@@ -36,11 +40,10 @@
     .stat-card:hover {
         border-color: var(--accent-blue);
         box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
     }
 
-    /* Línea de color superior según la categoría */
     .stat-card.equipo { border-top: 4px solid #17a2b8; }
-    .stat-card.patrulla { border-top: 4px solid #dc3545; }
     .stat-card.historial { border-top: 4px solid #6c757d; }
 
     .btn-action {
@@ -51,22 +54,85 @@
     }
 
     .icon-shape {
-        width: 60px;
-        height: 60px;
+        width: 60px; height: 60px;
         background: #f1f4f8;
         color: var(--primary-dark);
         border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         margin-bottom: 1rem;
     }
 
-    .section-title {
-        font-weight: 700;
-        color: var(--primary-dark);
-        letter-spacing: -0.5px;
+    .section-title { font-weight: 700; color: var(--primary-dark); letter-spacing: -0.5px; }
+
+    /* === ESTILOS DEL CHATBOT === */
+    .chat-widget {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
     }
+
+    .chat-button {
+        width: 60px; height: 60px;
+        background: var(--primary-dark);
+        border-radius: 50%;
+        display: flex; justify-content: center; align-items: center;
+        color: white; font-size: 24px; cursor: pointer;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        transition: transform 0.3s;
+    }
+    .chat-button:hover { transform: scale(1.1); background: var(--accent-blue); }
+
+    .chat-container {
+        width: 350px; height: 500px;
+        background: white; border-radius: 20px;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+        display: none; flex-direction: column;
+        margin-bottom: 15px; border: 1px solid var(--border-color);
+        overflow: hidden;
+        animation: slideUp 0.4s ease;
+    }
+    .chat-container.active { display: flex; }
+
+    .chat-header { 
+        background: linear-gradient(135deg, var(--primary-dark) 0%, #34495e 100%); 
+        color: white; padding: 15px; 
+        display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+    .chat-messages { 
+        flex: 1; padding: 15px; overflow-y: auto; 
+        background: #fcfcfc; display: flex; flex-direction: column; gap: 10px; 
+    }
+    
+    .message { display: flex; animation: fadeIn 0.3s ease; }
+    .message.bot { justify-content: flex-start; }
+    .message.user { justify-content: flex-end; }
+    
+    .message-bubble { 
+        max-width: 85%; padding: 12px 16px; border-radius: 18px; 
+        font-size: 13.5px; line-height: 1.5; 
+    }
+    .message.bot .message-bubble { background: var(--bot-bubble); color: #333; border-bottom-left-radius: 4px; }
+    .message.user .message-bubble { background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; }
+
+    .typing-indicator { display: none; padding: 5px 15px; font-size: 11px; color: #64748b; font-style: italic; }
+    .typing-indicator.active { display: block; }
+
+    .chat-input { padding: 15px; border-top: 1px solid #eee; display: flex; background: white; gap: 8px; }
+    .chat-input input { 
+        flex: 1; border: 1px solid #ddd; border-radius: 20px; 
+        padding: 8px 15px; outline: none; font-size: 14px; 
+    }
+    .send-button { border: none; background: none; color: var(--accent-blue); font-size: 20px; cursor: pointer; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
 <div class="dashboard-wrapper shadow-sm">
@@ -93,43 +159,28 @@
     <hr class="my-4 opacity-50">
 
     <div class="row g-4">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card stat-card equipo h-100 p-4">
                 <div class="icon-shape">
-                    <i class="fas fa-walkie-talkie fa-lg text-info"></i>
+                    <i class="fas fa-tools fa-lg text-info"></i>
                 </div>
-                <h5 class="fw-bold">Equipamiento</h5>
-                <p class="text-muted small">Reporte de radios, GPS, PDA y otros accesorios tácticos.</p>
+                <h5 class="fw-bold">Levantar Reporte</h5>
+                <p class="text-muted small">Inicia un ticket para fallas en computadoras, impresoras, red o equipos de energía.</p>
                 <div class="mt-auto">
                     <a href="{{ url_for('reporte_equipo_form') }}" class="btn btn-info text-white btn-action w-100">
-                        Nuevo Reporte <i class="fas fa-chevron-right ms-2 small"></i>
+                        Nuevo Reporte <i class="fas fa-plus ms-2 small"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card stat-card patrulla h-100 p-4">
-                <div class="icon-shape">
-                    <i class="fas fa-shield-alt fa-lg text-danger"></i>
-                </div>
-                <h5 class="fw-bold">Unidad Móvil</h5>
-                <p class="text-muted small">Cámaras vehiculares, DVR, luces y sistemas integrados.</p>
-                <div class="mt-auto">
-                    <a href="{{ url_for('reporte_patrulla_form') }}" class="btn btn-danger btn-action w-100">
-                        Reportar Falla <i class="fas fa-chevron-right ms-2 small"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card stat-card historial h-100 p-4">
                 <div class="icon-shape">
                     <i class="fas fa-layer-group fa-lg text-secondary"></i>
                 </div>
                 <h5 class="fw-bold">Mis Folios</h5>
-                <p class="text-muted small">Seguimiento en tiempo real de tus reportes enviados.</p>
+                <p class="text-muted small">Consulta el estatus de tus solicitudes y el historial de reparaciones.</p>
                 <div class="mt-auto">
                     <a href="{{ url_for('mis_reportes') }}" class="btn btn-outline-dark btn-action w-100">
                         Ver Mis Reportes <i class="fas fa-history ms-2 small"></i>
@@ -139,16 +190,125 @@
         </div>
     </div>
 
-    <div class="mt-5 p-4 bg-white border-radius-15 rounded-4 border">
+    <div class="mt-5 p-4 bg-white rounded-4 border">
         <div class="row align-items-center text-center text-md-start">
             <div class="col-md-1 text-center">
-                <i class="fas fa-info-circle fa-2x text-primary"></i>
+                <i class="fas fa-lightbulb fa-2x text-warning"></i>
             </div>
             <div class="col-md-11">
-                <h6 class="mb-1 fw-bold">Recordatorio Operativo</h6>
-                <p class="text-muted small mb-0">Cada reporte genera un folio único de seguimiento. Asegúrate de adjuntar fotos si el sistema lo solicita.</p>
+                <h6 class="mb-1 fw-bold">¿Sabías que?</h6>
+                <p class="text-muted small mb-0">La mayoría de los problemas se resuelven reiniciando el equipo. Si no funciona, ¡nuestro Chatbot puede orientarte!</p>
             </div>
         </div>
     </div>
 </div>
+
+<div class="chat-widget">
+    <div class="chat-container" id="chatWindow">
+        <div class="chat-header">
+            <div style="display:flex; align-items:center; gap:10px">
+                <i class="fas fa-robot"></i>
+                <div>
+                    <p style="margin:0; font-size: 14px; font-weight:bold">Asistente  DANI </p>
+                    <p style="margin:0; font-size: 10px;"><span class="status-dot"></span>Autosoporte activo</p>
+                </div>
+            </div>
+            <button onclick="toggleChat()" style="background:none; border:none; color:white; cursor:pointer; font-size:18px">✕</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-bubble">
+                    Hola <strong>{{ user.username }}</strong>. 👋<br>
+                    ¿Con qué equipo tienes problemas hoy? Escribe algo como: **Laptop, Impresora o Red**.
+                </div>
+            </div>
+            <div class="typing-indicator" id="typingIndicator">Escribiendo solución...</div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Escribe tu duda técnica..." onkeypress="handleKeyPress(event)">
+            <button class="send-button" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <div class="chat-button" onclick="toggleChat()">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+</div>
+
+<script>
+    const chatWindow = document.getElementById('chatWindow');
+    const chatMessages = document.getElementById('chatMessages');
+    const userInput = document.getElementById('userInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    function toggleChat() {
+        chatWindow.classList.toggle('active');
+        if(chatWindow.classList.contains('active')) userInput.focus();
+    }
+
+    const responses = {
+        'computadora': '💻 **Pasos para PC de Escritorio:**\n1. Asegúrate de que los cables de corriente y VGA/HDMI estén firmes.\n2. Prueba encendiendo solo el monitor.\n3. Si no da imagen, desconecta el equipo de la luz por 30 segundos.\n\n¿No funcionó? Por favor, cierra este chat y pulsa el botón **"Nuevo Reporte"**.',
+        
+        'laptop': '💼 **Ayuda para Laptop:**\n1. Conecta el cargador y verifica que el foco de carga encienda.\n2. Si la pantalla no enciende, intenta presionar `Windows + Ctrl + Shift + B`.\n3. Mantén el botón de encendido presionado por 15 segundos.\n\nSi el problema sigue, levanta tu reporte oficial para revisión física.',
+        
+        'impresora': '🖨️ **Falla de Impresión:**\n1. Revisa si hay una luz roja o mensaje de "Atasco de Papel".\n2. Apaga la impresora, espera 10 segundos y enciéndela.\n3. Verifica que el cable USB o la red estén conectados.\n\nSi persiste, genera un reporte mencionando si tiene tinta o tóner.',
+        
+        'red': '📡 **Problemas de Conexión:**\n1. Verifica si el cable de red detrás de tu equipo tiene una luz parpadeando.\n2. Desactiva y activa el Wi-Fi.\n3. Reinicia tu equipo.\n\nSi sigues sin internet, levanta un reporte para que revisemos el nodo de tu área.',
+        
+        'ups': '🔋 **Soporte de UPS:**\n1. Si pita seguido, puede estar sobrecargado. Quita algunos enchufes.\n2. Asegúrate de que esté conectado a un enchufe de pared directo.\n\nSi el equipo se apaga solo, solicita un cambio en la sección de **"Nuevo Reporte"**.',
+        
+        'folio': 'Para consultar tus reportes, usa el botón gris **"Ver Mis Reportes"** en el panel principal. Ahí verás si tu folio ya fue atendido.',
+        
+        'gracias': '¡De nada! Recuerda que si la falla persiste, la vía oficial es generar tu reporte en el botón azul. ¡Lindo día! 👋'
+    };
+
+    function addMessage(text, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.innerHTML = text.replace(/\n/g, '<br>');
+        messageDiv.appendChild(bubble);
+        chatMessages.insertBefore(messageDiv, typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function getBotResponse(rawMessage) {
+        const msg = rawMessage.toLowerCase();
+        
+        if (msg.includes('computadora') || msg.includes('escritorio') || msg.includes('pc')) return responses['computadora'];
+        if (msg.includes('laptop') || msg.includes('portatil')) return responses['laptop'];
+        if (msg.includes('impresora') || msg.includes('imprimir') || msg.includes('copia')) return responses['impresora'];
+        if (msg.includes('red') || msg.includes('internet') || msg.includes('wifi')) return responses['red'];
+        if (msg.includes('ups') || msg.includes('luz') || msg.includes('energia')) return responses['ups'];
+        if (msg.includes('folio') || msg.includes('estatus') || msg.includes('mi reporte')) return responses['folio'];
+        if (msg.includes('gracias') || msg.includes('tenks') || msg.includes('adios')) return responses['gracias'];
+        
+        return null;
+    }
+
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (message === '') return;
+
+        addMessage(message, true);
+        userInput.value = '';
+        typingIndicator.classList.add('active');
+
+        setTimeout(() => {
+            typingIndicator.classList.remove('active');
+            const botResponse = getBotResponse(message);
+            
+            if (botResponse) {
+                addMessage(botResponse);
+            } else {
+                addMessage("Lo siento, no tengo una solución rápida para ese problema... 📝\n\nPor favor, **levanta tu reporte de falla** en el panel principal para que un técnico pueda ayudarte personalmente.");
+            }
+        }, 1000);
+    }
+
+    function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
+</script>
 {% endblock %}

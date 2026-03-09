@@ -5,180 +5,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportar Equipo | Sistema de Tickets</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .input-focus:focus { border-color: #3b82f6; ring: 2px #3b82f6; }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen py-8 px-4">
-        <div class="max-w-3xl mx-auto">
-            <div class="bg-white rounded-lg shadow-xl p-6 mb-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-3xl font-bold text-blue-700 mb-2">💻 Reportar Equipo</h1>
-                        <p class="text-gray-600">Complete el formulario para reportar una falla o solicitud de mantenimiento</p>
-                    </div>
-                    <a href="{{ url_for('oficial_dashboard') }}" 
-                       class="text-indigo-600 hover:text-indigo-800 font-medium">
-                        ← Volver al Dashboard
-                    </a>
+<body class="bg-gray-50 font-sans antialiased text-gray-900">
+
+    <div class="min-h-screen py-6 px-4 md:py-12">
+        <div class="max-w-3xl mx-auto" x-data="{ sending: false }">
+            
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-blue-800 tracking-tight">💻 Reportar Equipo</h1>
+                    <p class="text-gray-500 mt-1">Generación de ticket para soporte técnico e infraestructura.</p>
                 </div>
-            </div>
+                <a href="{{ url_for('oficial_dashboard') }}" 
+                   class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800 transition">
+                    <span class="mr-2">←</span> Volver al Dashboard
+                </a>
+            </header>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                    <div class="mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800{% elif category == 'danger' %}bg-red-100 text-red-800{% elif category == 'warning' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">
-                        {{ message }}
+                    <div class="mb-6 p-4 rounded-xl shadow-sm border-l-4 
+                        {% if category == 'success' %}bg-green-50 border-green-500 text-green-800
+                        {% elif category == 'danger' %}bg-red-50 border-red-500 text-red-800
+                        {% else %}bg-blue-50 border-blue-500 text-blue-800{% endif %}">
+                        <div class="flex items-center">
+                            <span class="mr-3 font-bold">{% if category == 'success' %}✓{% else %}!{% endif %}</span>
+                            <span class="text-sm font-medium">{{ message }}</span>
+                        </div>
                     </div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
 
-            <div class="bg-white rounded-lg shadow-xl p-6">
-                <form method="POST" enctype="multipart/form-data" id="reporteForm">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                <form method="POST" enctype="multipart/form-data" id="reporteForm" @submit="sending = true">
                     
-                    <div class="mb-6">
-                        <label for="tipo" class="block text-sm font-bold text-gray-700 mb-2">
-                            Tipo de Equipo <span class="text-red-500">*</span>
-                        </label>
-                        <select name="tipo" id="tipo" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Seleccione un tipo --</option>
-                            <option value="Computadora de Escritorio">💻 Computadora de Escritorio</option>
-                            <option value="Laptop">💼 Laptop</option>
-                            <option value="Monitor">🖥️ Monitor</option>
-                            <option value="Impresora">🖨️ Impresora</option>
-                            <option value="Scanner">📠 Scanner</option>
-                            <option value="Router">📡 Router</option>
-                            <option value="Switch">🔌 Switch</option>
-                            <option value="Teléfono IP">☎️ Teléfono IP</option>
-                            <option value="UPS">🔋 UPS / Regulador</option>
-                            <option value="Proyector">📽️ Proyector</option>
-                            <option value="Otro">⚙️ Otro Equipo</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-6">
-                        <label for="serie" class="block text-sm font-bold text-gray-700 mb-2">
-                            Número de Serie o Inventario <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="serie" id="serie" required
-                               placeholder="Ej: INV-2024-001 o SN123456789"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs text-gray-500 mt-1">
-                            💡 Busque la etiqueta de inventario o el número de serie en el equipo
-                        </p>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold text-gray-700 mb-3">
-                            Estado del Equipo <span class="text-red-500">*</span>
-                        </label>
-                        <div class="space-y-3">
-                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-yellow-50 hover:border-yellow-300 transition">
-                                <input type="radio" name="estado" value="falla_menor" required
-                                       class="w-5 h-5 text-yellow-600">
-                                <div class="ml-3">
-                                    <div class="font-semibold text-gray-900">⚠️ Falla Menor</div>
-                                    <div class="text-sm text-gray-600">Problemas que no impiden su uso básico</div>
-                                </div>
-                            </label>
-
-                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-red-50 hover:border-red-300 transition">
-                                <input type="radio" name="estado" value="falla_grave" required
-                                       class="w-5 h-5 text-red-600">
-                                <div class="ml-3">
-                                    <div class="font-semibold text-gray-900">🔴 Falla Grave</div>
-                                    <div class="text-sm text-gray-600">El equipo no puede utilizarse</div>
-                                </div>
-                            </label>
-
-                            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition">
-                                <input type="radio" name="estado" value="mantenimiento" required
-                                       class="w-5 h-5 text-blue-600">
-                                <div class="ml-3">
-                                    <div class="font-semibold text-gray-900">🔧 Requiere Mantenimiento</div>
-                                    <div class="text-sm text-gray-600">Limpieza, actualización o revisión preventiva</div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="mb-6" id="comentariosSection">
-                        <label for="comentarios" class="block text-sm font-bold text-gray-700 mb-2">
-                            Descripción del Problema <span class="text-red-500">*</span>
-                        </label>
-                        <textarea name="comentarios" id="comentarios" rows="5" required
-                                  placeholder="Describa detalladamente el problema: ¿Qué sucede? ¿Cuándo comenzó?"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
-                    </div>
-
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-                        <h3 class="font-semibold text-gray-700 mb-2">📋 Información del Reporte</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <span class="text-gray-600">Usuario:</span>
-                                <span class="font-medium text-gray-900">{{ current_user.username }}</span>
+                    <div class="bg-blue-50/50 p-6 border-b border-gray-100">
+                        <h2 class="text-xs uppercase tracking-widest font-bold text-blue-600 mb-4 flex items-center">
+                            <i class="mr-2">👤</i> Identificación del Responsable
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nombre Completo del Responsable <span class="text-red-500">*</span></label>
+                                <input type="text" name="responsable_nombre" required 
+                                       placeholder="Persona que utiliza o custodia el equipo"
+                                       class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
                             </div>
+                            
                             <div>
-                                <span class="text-gray-600">Sector:</span>
-                                <span class="font-medium text-gray-900">{{ current_user.sector or 'Sin Sector' }}</span>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">N° de Empleado <span class="text-red-500">*</span></label>
+                                <input type="text" name="numero_empleado" required placeholder="Ej: 88231"
+                                       class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition">
                             </div>
-                            <div class="col-span-2">
-                                <span class="text-gray-600">Fecha y Hora Local:</span>
-                                <span id="fecha-local" class="font-medium text-gray-900">Calculando...</span>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Sector o Ubicación <span class="text-red-500">*</span></label>
+                                <input type="text" name="responsable_sector" required placeholder="Ej: Piso 2 - Finanzas"
+                                       class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">WhatsApp de contacto (Directo) <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-2.5 text-gray-400">+</span>
+                                    <input type="tel" name="telefono_responsable" required 
+                                           placeholder="521234567890" pattern="[0-9]+"
+                                           class="w-full pl-8 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                </div>
+                                <p class="text-xs text-blue-500 mt-2 italic font-medium">Se utilizará para coordinar la revisión técnica.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex gap-3">
-                        <button type="submit" 
-                                class="flex-1 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition transform hover:scale-105">
-                            📤 Enviar Reporte
-                        </button>
-                        <a href="{{ url_for('oficial_dashboard') }}" 
-                           class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition text-center">
-                            ❌ Cancelar
-                        </a>
+                    <div class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Categoría de Equipo <span class="text-red-500">*</span></label>
+                                <select name="tipo" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                    <option value="">-- Seleccione --</option>
+                                    <option value="Computadora">💻 Computadora de Escritorio</option>
+                                    <option value="Laptop">💼 Laptop / Portátil</option>
+                                    <option value="Impresora">🖨️ Impresora / Multifuncional</option>
+                                    <option value="Red">📡 Router / Switch / Red</option>
+                                    <option value="UPS">🔋 UPS / Respaldo Energía</option>
+                                    <option value="Otro">⚙️ Otros periféricos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">N° Serie / Inventario <span class="text-red-500">*</span></label>
+                                <input type="text" name="serie" required placeholder="Ej: CP-00432"
+                                       class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition text-uppercase">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-3">Gravedad de la falla <span class="text-red-500">*</span></label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <label class="relative flex items-center p-3 border rounded-xl cursor-pointer hover:bg-gray-50 transition group shadow-sm">
+                                    <input type="radio" name="estado_operativo" value="falla_menor" class="h-4 w-4 text-yellow-500 focus:ring-yellow-400">
+                                    <span class="ml-3">
+                                        <span class="block text-sm font-bold text-yellow-700">⚠️ Menor</span>
+                                        <span class="block text-xs text-gray-500">Lento o con ruidos</span>
+                                    </span>
+                                </label>
+                                <label class="relative flex items-center p-3 border rounded-xl cursor-pointer hover:bg-gray-50 transition group shadow-sm border-red-100">
+                                    <input type="radio" name="estado_operativo" value="falla_grave" class="h-4 w-4 text-red-600 focus:ring-red-500">
+                                    <span class="ml-3">
+                                        <span class="block text-sm font-bold text-red-700">🔴 Crítica</span>
+                                        <span class="block text-xs text-gray-500">No enciende / No sirve</span>
+                                    </span>
+                                </label>
+                                <label class="relative flex items-center p-3 border rounded-xl cursor-pointer hover:bg-gray-50 transition group shadow-sm border-blue-100">
+                                    <input type="radio" name="estado_operativo" value="mantenimiento" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                    <span class="ml-3">
+                                        <span class="block text-sm font-bold text-blue-700">🔧 Preventivo</span>
+                                        <span class="block text-xs text-gray-500">Limpieza / Revisión</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Descripción del problema <span class="text-red-500">*</span></label>
+                            <textarea name="comentarios" rows="4" required minlength="10"
+                                      placeholder="Sea lo más específico posible. Ej: 'Al encender se escucha un pitido y la pantalla queda negra...'"
+                                      class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition"></textarea>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row gap-4 pt-4 border-t border-gray-100">
+                            <button type="submit" 
+                                    :disabled="sending"
+                                    class="flex-1 bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl hover:bg-blue-800 transition transform active:scale-95 shadow-lg disabled:bg-blue-300 disabled:cursor-not-allowed flex justify-center items-center">
+                                <span x-show="!sending">📤 Enviar Ticket de Soporte</span>
+                                <span x-show="sending" x-cloak class="flex items-center">
+                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Procesando envío...
+                                </span>
+                            </button>
+                            <a href="{{ url_for('oficial_dashboard') }}" 
+                               class="flex-1 bg-gray-100 text-center text-gray-600 font-bold py-3.5 px-6 rounded-xl hover:bg-gray-200 transition">
+                                ❌ Cancelar
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
+            
+            <footer class="mt-8 text-center">
+                <p class="text-xs text-gray-400">© 2024 Departamento de Sistemas e Infraestructura</p>
+            </footer>
         </div>
     </div>
 
-    <script>
-        // Función para obtener la hora local del navegador del usuario
-        function mostrarFechaLocal() {
-            const ahora = new Date();
-            const opciones = { 
-                day: '2-digit', 
-                month: '2-digit', 
-                year: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            document.getElementById('fecha-local').innerText = ahora.toLocaleString('es-ES', opciones);
-        }
-
-        // Ejecutar al cargar la página
-        mostrarFechaLocal();
-
-        // Validación simple al enviar
-        document.getElementById('reporteForm').addEventListener('submit', function(e) {
-            const estado = document.querySelector('input[name="estado"]:checked');
-            const comentarios = document.getElementById('comentarios').value.trim();
-
-            if (!estado) {
-                e.preventDefault();
-                alert('Por favor, seleccione el estado del equipo');
-                return false;
-            }
-
-            if (!comentarios) {
-                e.preventDefault();
-                alert('Por favor, describa el problema');
-                return false;
-            }
-        });
-    </script>
 </body>
 </html>

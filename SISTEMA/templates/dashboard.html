@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard con Chatbot Flotante</title>
+    <style>
+        /* --- ESTILOS DEL DASHBOARD --- */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background-color: #f4f7f6;
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar { width: 200px; background: #1a202c; color: white; padding: 20px; }
+        .main { flex: 1; padding: 40px; }
+
+        /* --- AQUÍ ESTÁ EL "APARATO" DEL CHAT (WIDGET) --- */
+        .chatbot-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        /* El botón redondo que siempre ves */
+        .chat-trigger {
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+
+        /* La ventana del chat (oculta por defecto) */
+        .chat-window {
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+            display: none; /* Se activa con el clic */
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        /* Mostrar el chat cuando se activa */
+        .chat-window.show { display: flex; }
+
+        /* Cabecera, mensajes y entrada (estilos similares a tu código original) */
+        .chat-header { background: #2563eb; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; font-size: 14px; }
+        .chat-footer { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
+        .chat-footer input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        .chat-footer button { background: #2563eb; border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
+
+        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 10px; max-width: 80%; }
+        .bot { background: #e2e8f0; align-self: flex-start; }
+        .user { background: #2563eb; color: white; align-self: flex-end; margin-left: auto; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar"><h3>Menu</h3></div>
+    <div class="main">
+        <h1>Panel de Usuario</h1>
+        <p>Tu contenido aquí...</p>
+    </div>
+
+    <div class="chatbot-widget">
+        <div class="chat-window" id="miChat">
+            <div class="chat-header">
+                <span>🛠️ Soporte Técnico</span>
+                <span style="cursor:pointer" onclick="toggleChat()">✖</span>
+            </div>
+            <div class="chat-body" id="chatMessages">
+                <div class="msg bot">¡Hola! ¿En qué puedo ayudarte con tu equipo?</div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" id="userInput" placeholder="Escribe aquí..." onkeypress="checkEnter(event)">
+                <button onclick="enviarMensaje()">➤</button>
+            </div>
+        </div>
+
+        <div class="chat-trigger" onclick="toggleChat()">
+            💬
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar/ocultar el aparato del chat
+        function toggleChat() {
+            const chat = document.getElementById('miChat');
+            chat.classList.toggle('show');
+        }
+
+        function enviarMensaje() {
+            const input = document.getElementById('userInput');
+            const box = document.getElementById('chatMessages');
+            
+            if(input.value.trim() !== "") {
+                // Mensaje Usuario
+                box.innerHTML += `<div class="msg user">${input.value}</div>`;
+                
+                // Respuesta automática simple
+                setTimeout(() => {
+                    box.innerHTML += `<div class="msg bot">Entiendo. Un técnico revisará tu reporte pronto.</div>`;
+                    box.scrollTop = box.scrollHeight;
+                }, 1000);
+
+                input.value = "";
+                box.scrollTop = box.scrollHeight;
+            }
+        }
+
+        function checkEnter(e) { if(e.key === 'Enter') enviarMensaje(); }
+    </script>
+
+</body>
+</html>
