@@ -906,14 +906,25 @@ def crear_admin_inicial():
 # ---------------------- RUN ----------------------
 with app.app_context():
     db.create_all()
-    # Intentamos crear el admin de nuevo pero de forma segura
+    # Buscamos si ya existe el admin
     admin_root = User.query.filter_by(username='admin').first()
+    
     if not admin_root:
-        nuevo_admin = User(username='admin', role='Admin', sector='Soporte')
-        nuevo_admin.set_password('admin123') # Aquí usamos la función del modelo
+        # IMPORTANTE: No pasamos 'password' en el constructor 
+        # porque tu columna se llama 'password_hash'
+        nuevo_admin = User(
+            username='admin', 
+            role='Admin', 
+            sector='Soporte'
+        )
+        # Usamos tu función set_password que ya maneja 'password_hash'
+        nuevo_admin.set_password('admin123') 
+        
         db.session.add(nuevo_admin)
         db.session.commit()
-        print("ADMIN CREADO")
+        print("¡ADMINISTRADOR CREADO EXITOSAMENTE!")
+    else:
+        print("El administrador ya existe en la base de datos.")
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
