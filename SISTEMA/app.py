@@ -3,7 +3,7 @@ import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-
+from flask_login import LoginManager, UserMixin
 # Configuración básica de logs para ver qué pasa en el despliegue
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
