@@ -1,29 +1,31 @@
 import os
-import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, current_app, jsonify
+import logging
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
-from werkzeug.security import generate_password_hash, check_password_hash 
-from werkzeug.utils import secure_filename
-from sqlalchemy.exc import IntegrityError 
-import pymysql
-import logging 
+from flask_login import LoginManager
 
-# Configuración de la aplicación
+# Configuración básica de logs para ver qué pasa en el despliegue
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 
 # --- CONFIGURACIÓN DE LA BD ---
-# 1. Intentamos leer la variable de entorno de Railway
+# Intentamos obtener la URL desde el entorno (Railway la inyecta automáticamente)
 database_url = os.environ.get('DATABASE_URL')
 
+logger.info(f"--- Intentando conectar con DATABASE_URL detectada ---")
+
 if database_url:
-    # 2. Corrección para Railway: SQLAlchemy requiere 'mysql+pymysql://'
+    # Ajuste de protocolo para SQLAlchemy + PyMySQL
     if database_url.startswith("mysql://"):
         database_url = database_url.replace("mysql://", "mysql+pymysql://", 1)
+    
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    logger.info("Configuración exitosa: Usando base de datos remota de Railway.")
 else:
-    # 3. Configuración para desarrollo local (XAMPP/WAMP/Laragon)
-    # Asegúrate de que tu base de datos local se llame 'SISTEMA'
+    # Fallback solo para desarrollo local (tu laptop)
+    logger.warning("!!! AVISO: No se detectó DATABASE_URL. Usando conexión local (localhost). !!!")
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/SISTEMA'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -36,11 +38,11 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
 # Carpeta de fotos
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 
 # ---------------------- VARIABLES GLOBALES (ROLES) ----------------------
 ROLES_DISPONIBLES = ['Admin', 'Tecnico', 'Usuario'] 
