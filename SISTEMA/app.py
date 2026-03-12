@@ -69,15 +69,15 @@ def guardar_foto(file):
                 return None
             return os.path.join('uploads', unique_filename).replace('\\', '/')
         except Exception as e:
-            current_app.logger.error(f"Error al guardar archivo: {e}")
+            # CAMBIO AQUÍ: Usar app.logger en lugar de current_app.logger
+            app.logger.error(f"Error al guardar archivo: {e}")
             return None
-    return None 
-
+    return None
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
-
+    # Cambia User.query.get por db.session.get
+    return db.session.get(User, int(user_id))
 
 @app.context_processor
 def inject_now():
@@ -282,7 +282,7 @@ def admin_usuarios():
         except Exception as e:
             db.session.rollback()
             flash('Error al crear el usuario.', 'danger')
-            current_app.logger.error(f"Error al crear usuario: {e}")
+            app.logger.error(f"Error al crear usuario: {e}")
 
     # Lógica de VISUALIZACIÓN (GET)
     usuarios = User.query.order_by(User.username).all()
@@ -333,7 +333,7 @@ def admin_editar_usuario(user_id):
         except Exception as e:
             db.session.rollback()
             flash('Error al actualizar el usuario.', 'danger')
-            current_app.logger.error(f"Error al editar usuario: {e}")
+            app.logger.error(f"Error al editar usuario: {e}")
     
     return render_template('admin_editar_usuario.html', 
                            user=current_user, 
@@ -363,7 +363,7 @@ def admin_eliminar_usuario(user_id):
     except Exception as e:
         db.session.rollback()
         flash('Error al eliminar el usuario.', 'danger')
-        current_app.logger.error(f"Error al eliminar usuario: {e}")
+        app.logger.error(f"Error al eliminar usuario: {e}")
     
     return redirect(url_for('admin_usuarios'))
 
@@ -380,14 +380,15 @@ def oficial_dashboard():
 
 
 # ---------------------- DASHBOARD TECNICO ----------------------
-
 @app.route('/tecnico/dashboard')
 @login_required
 def tecnico_dashboard():
+    # 1. Verificar el rol
     if current_user.role != 'Tecnico':
         flash("Acceso denegado. Rol incorrecto.", "danger")
         return redirect(url_for('dashboard'))
 
+    # 2. Lógica de consulta para reportes pendientes
     base_query_equipo = EquipoReporte.query.filter(
         EquipoReporte.estado.in_(['Pendiente', 'En Progreso'])
     )
@@ -398,26 +399,29 @@ def tecnico_dashboard():
     
     sector_filtro = current_user.sector
     
-    current_app.logger.info(f"--- Diagnóstico Técnico Dashboard ---")
-    current_app.logger.info(f"Técnico: {current_user.username}, Sector: '{sector_filtro}'")
+    # --- LOGGING DE DIAGNÓSTICO ---
+    app.logger.info(f"--- Diagnóstico Técnico Dashboard ---")
+    app.logger.info(f"Técnico: {current_user.username}, Sector: '{sector_filtro}'")
 
+    # Si el técnico NO es 'Global', filtra por su sector
     if sector_filtro and sector_filtro != 'Global':
-        current_app.logger.info(f"Aplicando filtro por sector: '{sector_filtro}'")
+        app.logger.info(f"Aplicando filtro por sector: '{sector_filtro}'")
         base_query_equipo = base_query_equipo.filter_by(sector=sector_filtro)
         base_query_patrulla = base_query_patrulla.filter_by(sector=sector_filtro)
     else:
-        current_app.logger.info("El técnico es 'Global' o su sector es nulo. Se mostrarán todos los sectores.")
+        app.logger.info("El técnico es 'Global' o su sector es nulo. Se mostrarán todos los sectores.")
 
+    # Ejecutar consultas
     pendientes_equipo = base_query_equipo.order_by(EquipoReporte.fecha_reporte.asc()).all()
     pendientes_patrulla = base_query_patrulla.order_by(PatrullaReporte.fecha_reporte.asc()).all()
     
-    current_app.logger.info(f"Resultados: Equipos: {len(pendientes_equipo)}, Patrullas: {len(pendientes_patrulla)}")
+    app.logger.info(f"Resultados: Equipos: {len(pendientes_equipo)}, Patrullas: {len(pendientes_patrulla)}")
 
+    # 3. Renderizar la plantilla
     return render_template('tecnico_dashboard.html', 
                            user=current_user, 
                            pendientes_equipo=pendientes_equipo,
                            pendientes_patrulla=pendientes_patrulla)
-
 
 # ---------------------- REPORTE EQUIPO ----------------------
 @app.route('/reporte_equipo', methods=['GET', 'POST'])
@@ -572,9 +576,9 @@ def reporte_patrulla_form():
             flash(f"Inspección de unidad {unidad_numero} guardada correctamente.", "success")
             return redirect(url_for('tecnico_dashboard'))
 
-        except Exception as e:
+        except Exception as e:  
             db.session.rollback()
-            current_app.logger.error(f"Error en reporte técnico: {e}")
+            app.logger.error(f"Error en reporte técnico: {e}")
             flash("Error al procesar la inspección.", "danger")
             return render_template('reporte_patrulla_form.html', user=current_user)
 
@@ -643,7 +647,7 @@ def editar_reporte_equipo(reporte_id):
 
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error al editar equipo ID {reporte_id}: {e}")
+            app.logger.error(f"Error al editar equipo ID {reporte_id}: {e}")
             flash("❌ Error al guardar los cambios.", "danger")
             return redirect(url_for('tecnico_dashboard'))
 
@@ -750,7 +754,7 @@ def eliminar_reporte_patrulla(reporte_id):
     except Exception as e:
         db.session.rollback()
         flash(f'Error al eliminar el reporte: {str(e)}', 'danger')
-        current_app.logger.error(f"Error al eliminar reporte de patrulla: {e}")
+        app.logger.error(f"Error al eliminar reporte de patrulla: {e}")
     
     return redirect(url_for('admin_ver_patrullas'))
 
@@ -849,7 +853,7 @@ def admin_eliminar_reporte_equipo(reporte_id):
     except Exception as e:
         db.session.rollback()
         flash("Error al intentar eliminar el reporte.", "danger")
-        current_app.logger.error(f"Error al eliminar reporte de equipo: {e}")
+    app.logger.error(f"Error al eliminar reporte de equipo: {e}")
         
     return redirect(url_for('admin_ver_equipos'))
 
