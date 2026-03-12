@@ -1,24 +1,16 @@
 import os
 import logging
-import datetime  # Importado correctamente para evitar el NameError
+import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_required, current_user
+from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash 
-from flask_login import login_required
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-
-# Configuración de logs
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
 # --- CONFIGURACIÓN DE LA BD ---
-# --- CONFIGURACIÓN DE LA BD ---
 database_url = os.environ.get('DATABASE_URL')
-
-app.logger.info("--- Intentando conectar con DATABASE_URL detectada ---")
 
 if database_url:
     # Ajuste automático de protocolo para Railway
@@ -28,29 +20,23 @@ if database_url:
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.logger.info("Configuración exitosa: Usando base de datos remota de Railway.")
 else:
-    # Configuración para local si no hay variable de entorno
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/SISTEMA'
-    app.logger.warning("!!! AVISO: No se detectó DATABASE_URL. Usando localhost. !!!")
+    app.logger.warning("No se detectó DATABASE_URL. Usando localhost.")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'mi_clave_secreta_y_segura_para_sistema_tickets' 
 
 db = SQLAlchemy(app)
+
 # --- CONFIGURACIÓN DE LOGIN ---
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Carpeta de fotos
+# --- CARPETA DE SUBIDAS ---
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Carpeta de fotos
-UPLOAD_FOLDER = 'static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 # ---------------------- VARIABLES GLOBALES (ROLES) ----------------------
 ROLES_DISPONIBLES = ['Admin', 'Tecnico', 'Usuario'] 
 
@@ -77,7 +63,7 @@ def guardar_foto(file):
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Cambia User.query.get por db.session.get
+    # Esto reemplaza todo lo anterior
     return db.session.get(User, int(user_id))
 
 @app.context_processor
