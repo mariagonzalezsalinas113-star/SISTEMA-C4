@@ -916,25 +916,32 @@ def crear_admin_inicial():
 
 # ---------------------- RUN ----------------------
 # ---------------------- INICIALIZACIÓN DE BD Y ADMIN ----------------------
+# --- INICIALIZACIÓN DE LA BASE DE DATOS Y ADMIN ---
 with app.app_context():
-    db.create_all()  # Crea las tablas si no existen
-    
-    # Buscamos si ya existe el admin para no duplicarlo
-    from models import User  # Asegúrate de importar tu modelo User
-    admin = User.query.filter_by(username='admin').first()
-    
-    if not admin:
-        hashed_password = generate_password_hash('admin123', method='pbkdf2:sha256')
-        new_admin = User(
-            username='admin',
-            password=hashed_password,
-            rol='admin' # O el campo que uses para el rol
-        )
-        db.session.add(new_admin)
-        db.session.commit()
-        logger.info("✅ Administrador creado exitosamente: usuario 'admin', clave 'admin123'")
-    else:
-        logger.info("ℹ️ El administrador ya existe en la base de datos.")
+    try:
+        db.create_all()  # Crea las tablas en Railway
+        
+        # Buscamos si ya existe el admin
+        admin_existente = User.query.filter_by(username='admin').first()
+        
+        if not admin_existente:
+            logger.info("Creando usuario administrador por defecto...")
+            nuevo_admin = User(
+                username='admin',
+                role='admin',        # Según tu modelo es 'role'
+                sector='Sistemas'    # O el sector que prefieras
+            )
+            # Usamos tu función del modelo para el hash
+            nuevo_admin.set_password('admin123') 
+            
+            db.session.add(nuevo_admin)
+            db.session.commit()
+            logger.info("✅ Administrador 'admin' creado con éxito.")
+        else:
+            logger.info("ℹ️ El administrador ya existe.")
+            
+    except Exception as e:
+        logger.error(f"❌ Error al inicializar: {e}")
 # ---------------------- EJECUCIÓN ----------------------
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
